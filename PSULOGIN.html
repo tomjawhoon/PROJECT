@@ -1,30 +1,55 @@
-<html>
-  <body>
-    <h2>LOGIN</h2>
-    <form action="/" method="post">
-      Username: <input type="text" name="username" /> <br>
-      Password: <input type="password" name="password" /> <br>
-    <input type="submit" value="Submit">
-    </form>
-  </body>
-  <!-- The core Firebase JS SDK is always required and must be listed first -->
-<script src="https://www.gstatic.com/firebasejs/6.4.0/firebase-app.js"></script>
 
-<!-- TODO: Add SDKs for Firebase products that you want to use
-     https://firebase.google.com/docs/web/setup#config-web-app -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style> 
+            div{
+        height:auto; 
+        margin:0 auto; 
+ 
+    }
 
-<script>
-  // Your web app's Firebase configuration
-  var firebaseConfig = {
-    apiKey: "AIzaSyDPwR_Tlxe5MODIEPugWCnO_drEh6-4jjw",
-    authDomain: "login-psu-final.firebaseapp.com",
-    databaseURL: "https://login-psu-final.firebaseio.com",
-    projectId: "login-psu-final",
-    storageBucket: "login-psu-final.appspot.com",
-    messagingSenderId: "152285332333",
-    appId: "1:152285332333:web:bc428892887d5004"
-  };
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-</script>
-</html> 
+    form{
+        width:50%; 
+        margin:0 auto;
+    }
+</style>
+  <title>PSU COIN</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+<br>
+<br>
+  <!-- <div align="center"> -->
+  <form action="/" method="post">
+    <h2>PSU LOGIN</h2>
+    <div class="form-group">
+      <label for="email">username:</label>
+      <input type="text" class="form-control" id="username" placeholder="Enter username" name="username">
+    </div>
+    <div class="form-group">
+      <label for="pwd">Password:</label>
+      <input type="password" class="form-control" id="password" placeholder="Enter password" name="password">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+ 
+
+  </form>
+  <br>
+  <br>
+          <center>
+            <div class="alert alert-light" role="alert">
+                <p>&copy; Masterofnodejs.5935512088</p>
+              </div>
+          </center>
+ 
+</body>
+</html>
+
