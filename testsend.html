@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- <script src="./web3.min.js"></script>
+    <script src="./psulogin.js"></script>  -->
+</head>
+<body>
+
+  <h1>Send ERC20 Token</h1>
+
+  <h2>Token Address</h2>
+  <!-- <input type="text" id="contractAddresss" size="80" oninput="onAddressChange()"></input> -->
+  <form action="/send" method="POST">
+  <input type="text"  name="contractAddress" id="contractAddress" size="80"></input>
+  <p>e.g. 0x0d01bc6041ac8f72e1e4b831714282f755012764</p>
+
+  <h2>money</h2>
+  <input type="number" name="money" id="money" size="80"></input>
+  <p>e.g. 0x4e47581813943E481D1243953b9d951B9B6ef6Ec</p>
+
+  <h2>FORM Address</h2>
+  <input type="text"  name="fromAddress" id="fromAddress" size="80"></input>
+  <p>e.g. 0x6c25FE295Ecee6F0D8D34fC28dca2de68538fA4a</p>
+
+  <h2>Recipients Address</h2>
+  <input type="text" name="toAddress" id="toAddress" size="80"></input>
+  <p>e.g. 0x4e47581813943E481D1243953b9d951B9B6ef6Ec</p>
+
+  
+
+ <button type="submit" >Send ERC20</button>
+  <!-- <input type="text" id="privatekey" size="80"></input>
+  <p>e.g. 0x4e47581813943E481D1243953b9d951B9B6ef6Ec</p> -->
+  </form>
+</body>
+<script src="./web3.min.js"></script>
+<script src="./psulogin.js"></script> 
+</html>
