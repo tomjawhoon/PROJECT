@@ -1,96 +1,71 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
   <meta charset="utf-8">
   <script src="./web3.min.js"></script>
-  <head>
-    <style> 
-              div{
-          height:auto; 
-          margin:0 auto; 
-   
-      }
-  
-      form{
-          width:50%; 
-          margin:0 auto;
-      }
-  </style>
 </head>
+
 <body>
 
-  <!-- <h3>Get ERC20 Token Balance </h3> -->
+  <h1>Get ERC20 Token Balance </h1>
+  <!-- <p>Ethereum support browser or MetaMask is needed.</p> -->
 
-  <!-- <h2>Token Address</h2>
-  <form>
-  <input type="text" id="token-address" size="80" oninput="onAddressChange()"></input>
-  <p>e.g. 0x0d01bc6041ac8f72e1e4b831714282f755012764</p>
+
+  <form id="submitSend" method="GET">
+    <!-- <input type="text" id="token-address" size="80" "></input>
+  <p>e.g. 0x0d01bc6041ac8f72e1e4b831714282f755012764</p> -->
 
   <h2>Wallet Address</h2>
-  <input type="text" id="wallet-address" size="80"  oninput="onAddressChange()"></input>
-  <p>e.g. 0x3B71E6d3454A9df00AaD0b25e673c8803aE62C9D</p> -->
-  <br>
-  <br>
-  <form action="/" method="post">
-    <h3>Get ERC20 Token Balance</h3>
-    <br>
-    <div class="form-group">
-      <label for="email">username:</label>
-      <input type="text" class="form-control" id="token-address"  oninput="onAddressChange()" placeholder="contractAddress" name="username">
-      <h7> e.g. 0x0d01bc6041ac8f72e1e4b831714282f755012764</h7>
-    </div>
-    <div class="form-group">
-      <label for="pwd">Password:</label>
-      <input type="text" class="form-control" id="wallet-address" oninput="onAddressChange()" placeholder="walletaddress" name="password">
-      <p>e.g. 0xd789Cca7679b70eA9850f9D0DC9d6A2Eb8EF2aa5</p> 
-    </div>
-   <div id="result">
+  <input type=" text" id="fromAddress" size="80" ></input>
+  <p>e.g. 0x6c25FE295Ecee6F0D8D34fC28dca2de68538fA4a</p>
 
-   </div>
-  
+
+  <button type="submit">Send ERC20</button>
+
+
+  <h2>Result</h2>
+  <span id=" result"></span>
+
   </form>
 
-
+</body>
+<script src="./web3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+  crossorigin="anonymous"></script>
   <script>
-
-    var web3js;
-
-    function getERC20TokenBalance(tokenAddress, walletAddress, callback) {
-      let minABI = [
-        {"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"type":"function"},
-        {"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"type":"function"}
-      ];
-      let contract = new web3js.eth.Contract(minABI, tokenAddress);
-      contract.methods.balanceOf(walletAddress).call((error, balance) => {
-        contract.methods.decimals().call((error, decimals) => {
-          console.log(balance);
-          console.log(decimals);
-          balance = balance / (10**decimals);
-          callback(balance);
-        });
-      });
-    }
-
-    function onAddressChange(e) {
-      let tokenAddress = document.getElementById('token-address').value;
-      let walletAddress = document.getElementById('wallet-address').value;
-      if(tokenAddress != "" && walletAddress != "") {
-        getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {
-          document.getElementById('result').innerText = balance.toString();
-        });        
+    var url;
+    var id;
+    (() => {
+      url = window.location.href
+      id = url.split('/').slice(-1).toString() // ไอดี ของผู้ login
+    })()
+    axios({
+      method: 'GET',
+      url: '/getWalletById', //ส่งไปค่านี้
+      headers: {
+        id: id  // รหัสนักศึกษา
       }
-    }
+    }).then(result => { // ดึงค่ามาใส่ใน input ด้วย axios โดยตรง
+      console.log("result", result)
+      $('#fromAddress').val(result.data.address)
+      // $('#privateKey').val(result.data.privateKey)
+    })
 
-    window.onload = function() {
-      if (typeof web3 !== 'undefined') {
-        web3js = new Web3(web3.currentProvider);
-      } else {
-        web3js = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io"));
-      }
-    }
+    document.querySelector('#submitSend').addEventListener('submit', e => {
+      e.preventDefault()
+      axios({ // ส่งค่าทั้งหมดไปๆ ยัง ฝั่ง nodejs
+        method: 'GET',
+        url: '/balance/' + id + '/confirm', // ส่งไปยังค่านี้
+        headers: {
+          fromAddress: $('#fromAddress').val(),
 
+        }
+      })
+    })
   </script>
 
-</body>
+
+
 </html>

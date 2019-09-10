@@ -10,11 +10,9 @@ async function payToken () {
   var toAddress = '0x4e47581813943E481D1243953b9d951B9B6ef6Ec'
   var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
   var count = await web3.eth.getTransactionCount(fromAddress);
-
   var contractAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
   var contract = new web3.eth.Contract(abi, contractAddress, { from: fromAddress });
   var weiTokenAmount = web3.utils.toWei(1+'', 'ether');
- 
   var rawTransaction = {
     "from": fromAddress,
     "nonce": "0x" + count.toString(16),
@@ -25,7 +23,6 @@ async function payToken () {
     "data": contract.methods.transfer(toAddress, weiTokenAmount).encodeABI(),
     "chainId": 0x03
   };
-
   var privKey = Buffer.from('E1C661DE87DF9B024A63EC2F47B041D76326082FFD7B26CEF6F100F901E232C3', 'hex');
   const tx = new EthereumTx(rawTransaction, { chain: 'kovan' });
   tx.sign(privKey);
@@ -33,7 +30,6 @@ async function payToken () {
   var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
   return receipt
 }
-
 payToken().then((result) => {
   console.log(result)
 })
