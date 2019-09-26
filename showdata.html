@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="./web3.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">PSU_COIN</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="#">Features</a>
+                <a class="nav-item nav-link" href="#">Pricing</a>
+                <a class="nav-item nav-link disabled" href="#">Disabled</a>
+            </div>
+        </div>
+    </nav>
+
+    <form action='/showtime' class="col-6" method="GET">
+    </form>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+    <table>
+        <div class="jumbotron">
+            <h2>Profile</h2>
+            <button type="button" class="btn btn-danger"><a href="/">BACK</a></button>
+            <table>
+                <tr>
+                    <th>Student_id</th>
+                    <th>Wallet_address</th>
+                    <th>Balance</th>
+                    <th>Token</th>
+                    <th>type</th>
+                </tr>
+                <!-- <% data.forEach(function(data) { %> -->
+                <tr>
+                    <td>
+                        <!-- <%= data.event_id %> -->
+                    </td>
+                    <td>
+                        <!-- <%= data.device_id %> -->
+                    </td>
+                    <td>
+                        <!-- <%= data.button_time %> -->
+                    </td>
+                    <td>
+                        <h5> PSU COIN</h5>
+                    </td>
+                    <td>
+                        <form>
+                            <button type="button" class="btn btn-info"
+                                onclick="window.location.href='/user/update?id=<%= data.id %>'">edit</button>
+                        </form>
+                        <form>
+                            <button type="button" class="btn btn-danger"
+                                onclick="myClick('<%= data.id %>')">delete</button>
+                        </form>
+                    </td>
+
+                </tr>
+                <!-- <% }); %> -->
+            </table>
+
+        </div>
+    </table>
+
+
+
+
+</body>
+<title>Show data</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<!--===============================================================================================-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<!--===============================================================================================-->
+<!--===============================================================================================-->
+
+<!--===============================================================================================-->
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="./web3.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<!-- <script src="./psulogin.js"></script>  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+<script>
+    function gotoSendETH() {
+        window.location.href = window.location.href.replace('balance', 'send', 'index')
+    }
+
+    function gotoindex() {
+        window.location.href = url.replace('balance', 'index', 'send')
+    }
+</script>
+
+<script>
+    var url;
+    var id;
+    (() => {
+        url = window.location.href
+        id = url.split('/').slice(-1).toString() // ไอดี ของผู้ login
+    })()
+    axios({
+        method: 'GET',
+        // url: '/getWalletById', //ส่งไปค่านี้
+        url: '/showdata/' + id + '/confirm', // ส่งไปยังค่านี้
+        headers: {
+            id: id  // รหัสนักศึกษา
+        }
+    }).then(result => { // ดึงค่ามาใส่ใน input ด้วย axios โดยตรง
+        console.log("result_formaxios_getWalletById", result)
+        // console.log("result_formaxios_getWalletById", result.config.headers.id)
+        // $('#fromAddress').val(result.data.address)
+        // $('#showid').val(result.config.headers.id)
+    }).catch(result => {
+        console.log("errr")
+    })
+//   document.querySelector('#submitSend').addEventListener('submit', e => {
+//     e.preventDefault()
+//     axios({ // ส่งค่าทั้งหมดไปๆ ยัง ฝั่ง nodejs
+//       method: 'GET',
+//       url: '/balance/' + id + '/confirm', // ส่งไปยังค่านี้
+//       headers: {
+//         fromAddress: $('#fromAddress').val(),
+//       }
+//     }).then(result => { // ดึงค่ามาใส่ใน input ด้วย axios โดยตรง
+//       console.log("Retuen_value_balance", result)
+//       console.log("test_send => ",result.data)
+//       // $('#fromAddress').val(result.data.address)
+//       $('#result').text(result.data)
+//     }).catch(result => {
+//       console.log("errr")
+//     })
+//   })
+</script>
+
+
+</html>

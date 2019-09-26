@@ -1,4 +1,3 @@
-
 const express = require('express');
 const soap = require('soap');
 const bodyParser = require('body-parser')
@@ -16,6 +15,7 @@ const cors = require('cors');
 app.use(cors());
 var engines = require('consolidate');
 app.use('/api', router);
+app.use('/front', express.static(path.join(__dirname, 'front')));
 app.set('views', __dirname + '/');
 app.engine('html', engines.mustache);
 app.set('view engine', 'html');
@@ -54,25 +54,33 @@ router.route('/')
                 user.password = req.body.password
                 client.GetStaffDetails(user, (err, response) => {
                     if (response.GetStaffDetailsResult.string[0] == "") {
-                        res.send('<script>alert("กรุณากรอกข้อมูลใหม่");</script>')
+                        res.redirect('/error')
                         console.error(err);
                     }
                     else {
                         var account = new Web3EthAccounts('ws://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261');
                         var user_eth = account.create();
+                        console.log("Show_profile ", response)
                         database.ref('users').child(user.username).once("value", snapshot => {
                             if (snapshot.exists()) { // check ว่ามีการสร้างแล้วหรือยัง
                                 console.log('already exists')
                                 // res.send('<script>alert("มีข้อมูลในระบบแล้ว");</script>');
-                                res.redirect('/send/' + user.username)
-                            } else { // หากยังไม่มีจะทำการสร้างกระเป๋า 
+                                res.redirect('/index/' + user.username)
+                                return false; 
+                            } else { 
+                                console.log('bad bad')
+                                // หากยังไม่มีจะทำการสร้างกระเป๋า 
                                 database.ref('users').child(user.username).push({
                                     address: user_eth.address,
                                     privateKey: user_eth.privateKey.substring(2).toUpperCase(),
-                                    balance: 0,
+                                    balance: "",
+                                    name: response,
                                 }).then(() => {
                                     console.log('create new wallet')
-                                    res.send({ user_eth, response });
+                                    // console.log('test_Show',name)
+                                    // res.send({ user_eth, response });
+                                    res.redirect('/index/' + user.username)
+                                     return false; 
                                     // res.redirect("/showdata)                 
                                 }).catch(e => {
                                     console.log(e)
@@ -87,28 +95,30 @@ router.route('/')
 
 router.route('/send/:id')
     .get((req, res) => {
-        res.render('testsend.html')
+        res.render('tranfer.html')
     })
 router.route('/send/:id/confirm')
     .get((req, res) => {
         async function Tranfer() {
+            // const id = req.headers.toaddress;
+    
             console.log('xx: ', req.headers)
+            const id = req.headers.toaddress;
+            console.log("id",id)
             const fromAddress = req.headers.fromaddress;
             const money = req.headers.money;
             const privateKey = req.headers.privatekey;
-
             console.log("fromAddress =>", fromAddress)
             console.log("money =>", money)
             console.log("privateKey =>", privateKey)
 
             const toAddress = await getReceiverWalletFromId(req.headers.toaddress)
-            let toAddress2;
-            toAddress.forEach(snap => { // ดึงค่าของผฦู้ที่ต้องการจะส่งไป
-                toAddress2 = snap.val().address
-                console.log("toAddress2 =>", toAddress2)
-                // privateKey2 = snap.val().privateKey
-                // console.log("privateKey2 =>",privateKey2)
-            })
+            let toAddress2 = toAddress.val();
+            console.log("toAddress2",toAddress2)
+            // toAddress.(snap => { // ดึงค่าของผฦู้ที่ต้องการจะส่งไป
+            //     toAddress2 = snap.val().address
+            //     console.log("toAddress2 =>", toAddress2)
+            // })
 
             web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
             var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
@@ -123,48 +133,80 @@ router.route('/send/:id/confirm')
                 "gasLimit": "0x250CA",//151754
                 "to": contractAddress,
                 "value": "0x0",
-                "data": contract.methods.transfer(toAddress2, weiTokenAmount).encodeABI(),
+                "data": contract.methods.transfer(toAddress2.address, weiTokenAmount).encodeABI(),
                 "chainId": 0x03
             };
             var privKey = Buffer.from(privateKey, 'hex');
-            //   var privKey = Buffer.from('privateKey2', 'hex');
             console.log("privKey = > ", privKey);
             const tx = new EthereumTx(Transaction, { chain: 'kovan' });
             tx.sign(privKey);
             var serializedTx = tx.serialize();
+            console.log("serializedTx =>", serializedTx)
             var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
-            return receipt
-            //   database.ref('users').child(id).push({
-            //     balance : money
-            // }).then(() => {
-            //     console.log('Push balance')
-            //     // res.send({user_eth,response});              
-            //     // res.redirect("/showdata)                 
-            // }).catch(e => {
-            //     console.log(e)
-            // })
-
+            console.log("receipt =>", receipt)
+            res.json(JSON.stringify(receipt.transactionHash))
+            database.ref('users').child(id).once("value", snapshot => {
+                if (snapshot.exists()) { // check ว่ามีการสร้างแล้วหรือยัง
+                    console.log('Have_data')
+                    database.ref('users').child(id).update({
+                        balance: req.headers.money,
+                    }).then(() => {
+                        console.log('push_perfect')
+                    }).catch(e => {
+                        console.log(e)
+                    })
+                }
+            })
+            // return receipt
         }
-
         Tranfer().then((result) => {
             console.log(result)
         })
 
     })
 
-router.route('/showdata')
+
+router.route('/showdata/:id')
     .get((req, res) => {
-        res.render('test1.html')
+        res.render('showdata.html')
+    })
+router.route('/showdata/:id/confirm')
+    .get((req, res) => {
+        var test = [];
         var leadsRef = database.ref('users');
-        leadsRef.on('value', (snapshot) => {
-            snapshot.forEach((childSnapshot) => {
-                var childData = childSnapshot.val();
-                console.log(childData)
-            });
-        });
+         leadsRef.on('value', (snapshot) => {
+             snapshot.forEach((childSnapshot)  => {
+               var childData = childSnapshot.val();
+               console.log(childData)
+               test.push(childData)
+               
+             });
+         });
+
+         res.json(JSON.stringify(test))
+        // database.ref('users').child(id).once("value", snapshot => {
+        //     snapshot.forEach(snap => {
+        // var leadsRef = database.ref('users');
+        // leadsRef.on('value', (snapshot) => {
+        //     snapshot.forEach((childSnapshot) => {
+        //         var childData = childSnapshot.val();
+        //         console.log(childData)
+        //     });
+        // });
     })
 
+router.route('/error')
+    .get((req, res) => {
+        res.render('error.html')
+    })
 
+router.route('/index/:id')
+    .get((req, res) => {
+        res.render('index.html')
+    })
+router.route('/index/:id/confirm')
+    .get((req, res) => {
+    })
 
 router.route('/balance/:id')
     .get((req, res) => {
@@ -172,13 +214,14 @@ router.route('/balance/:id')
     })
 router.route('/balance/:id/confirm')
     .get((req, res) => {
-        // var web3;
+        // const toAddress = await getReceiverWalletFromId(req.headers.toaddress)
+        // let toAddress2;
+        // toAddress.forEach(snap => { // ดึงค่าของผฦู้ที่ต้องการจะส่งไป
+        //     toAddress2 = snap.val().address
+        //     console.log("toAddress2 =>", toAddress2)
+        // })
         web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
         function getERC20TokenBalance(tokenAddress, walletAddress, callback) {
-            // let minABI = [
-            //     { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "type": "function" },
-            //     { "constant": true, "inputs": [], "name": "decimals", "outputs": [{ "name": "", "type": "uint8" }], "type": "function" }
-            // ];
             var minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
             let contract = new web3.eth.Contract(minABI, tokenAddress);
             contract.methods.balanceOf(walletAddress).call((error, balance) => {
@@ -186,7 +229,8 @@ router.route('/balance/:id/confirm')
                     balance = balance / (10 ** decimals);
                     console.log("decimals => ", decimals);
                     console.log("balance => ", balance, "PSU");
-                    callback(balance);
+                    res.json(JSON.stringify(balance))
+                    // res.send(JSON.stringify(balance))
                 }).then(() => {
                     console.log('complete_check_balance')
                 }).catch(e => {
@@ -217,14 +261,76 @@ router.route('/getWalletById') // ดึงค่าจาก ฝั่ง front
         const id = req.headers.id; // รหัสนักศึกษา ผู้ส่ง
         console.log("get", id)
         database.ref('users').child(id).once("value", snapshot => {
-            snapshot.forEach(snap => {
-                res.send(JSON.stringify({
-                    address: snap.val().address,
-                    privateKey: snap.val().privateKey
-                }))
-            })
+            res.send(JSON.stringify({
+                address: snapshot.val().address,
+                privateKey: snapshot.val().privateKey,
+            }))
         })
+        // database.ref('users').child(id).child(name).child(GetStaffDetailsResult),child(string).once("value", snapshot => {
+        //     snapshot.forEach(snap => {
+        //         res.send(JSON.stringify({
+        //             profile : snap.val().string,
+        //         }))
+        //     })  
+        // })
     })
+
+
+    router.route('/getProfileById') // ค้นหารายละเอียด ผู้ส่ง
+    .get((req, res) => {
+        const id = req.headers.id; // รหัสนักศึกษา ผู้ส่ง
+        console.log("get", id)
+        database.ref('users').child(id).once("value", snapshot => {
+            if (snapshot.val()) {
+                const data = snapshot.val().name.GetStaffDetailsResult.string
+
+                res.send(JSON.stringify({
+                    id: data[0],
+                    name: data[1],
+                    lastName: data[2]
+                }))
+            } else {
+                res.send(JSON.stringify({
+                    id: '',
+                    name: '',
+                    lastName: ''
+                }))
+            }
+        })
+        // database.ref('users').child(id).child(name).child(GetStaffDetailsResult),child(string).once("value", snapshot => {
+        //     snapshot.forEach(snap => {
+        //         res.send(JSON.stringify({
+        //             profile : snap.val().string,
+        //         }))
+        //     })  
+        // })
+    })
+
+
+
+// router.route('/getWalletById_FormPSU') // ดึงค่าจาก ฝั่ง front end ทีส่งค่ามา ทำงานในฟังกืช์่นนี้ เอามาใส่ในช่อง
+//     .get((req, res) => {
+//         database.ref("app/").once('child_added', function(snapshot){
+//             if(snapshot.exists()){
+//                 var content = '';
+//                 snapshot.forEach(function(data){
+//                     var val = data.val();
+//                     console.log("row",data.val());
+//                     console.log("title",data.getKey());
+//                     content +='<tr>';
+//                     content += '<td>' + data.getKey() + '</td>';
+//                     content += '<td>' + val.title + '</td>';
+//                     content += '<td>' + val.content + '</td>';
+//                     content += '<td><a href="'+val.thumbnail+'" target="_blank"> Click for Preview</a></td>';
+//                     content += '<td><a href="edit.html?id='+data.getKey()+'" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Edit</a></td>';
+//                     content += '</tr>';
+//                 });
+//                 var theDiv = document.getElementById("ex-table");
+//                 theDiv.innerHTML += content; 
+//                 //$('#ex-table').append(content);
+//             }
+//       });
+//     })
 
 async function getReceiverWalletFromId(id) {
     return await database.ref('users').child(id).once("value")
