@@ -62,14 +62,14 @@ router.route('/')
                         var user_eth = account.create();
                         console.log("Show_profile ", response)
                         database.ref('users').child(user.username).once("value", snapshot => {
-                            if (snapshot.exists()) { // check ว่ามีการสร้างแล้วหรือยัง
+                            if (snapshot.exists()) { // check ????????????????????????
                                 console.log('already exists')
-                                // res.send('<script>alert("มีข้อมูลในระบบแล้ว");</script>');
+                                // res.send('<script>alert("??????????????????");</script>');
                                 res.redirect('/index/' + user.username)
                                 return false;
                             } else {
                                 console.log('bad bad')
-                                // หากยังไม่มีจะทำการสร้างกระเป๋า 
+                                // ?????????????????????????????? 
                                 database.ref('users').child(user.username).push({
                                     address: user_eth.address,
                                     privateKey: user_eth.privateKey.substring(2).toUpperCase(),
@@ -102,29 +102,33 @@ router.route('/send/:id/confirm')
         async function Tranfer() {
             // const id = req.headers.toaddress;
 
-            console.log('xx: ', req.headers)
-            console.log('yy: ', req.headers)
+
             const id = req.headers.toaddress;
-            console.log("id", id)
             const fromAddress = req.headers.fromaddress;
             const money = req.headers.money;
             const privateKey = req.headers.privatekey;
             //const testvalue = req.headers.result;
-            console.log("testvalue === >",req.header.value1)
+
+            console.log('xx: ', req.headers)
+            console.log("id", id)
+            console.log("testvalue === >", req.header.value1)
             console.log("fromAddress =>", fromAddress)
             console.log("money =>", money)
             console.log("privateKey =>", privateKey)
 
-            const toAddress = await getReceiverWalletFromId(req.headers.toaddress)
-            //console.log("toAddress_show_totalvalue =>" , toAddress)
+
+            const toAddress = await getReceiverWalletFromId(id)
+            console.log("toAddress_show_toAddress =>", toAddress)
             let toAddress2 = toAddress.val();
             let totalvalue = toAddress2.balance;
             //let toAddress3 = toAddress.val([1].address);
+
+
             console.log("toAddress2 =>", toAddress2)
             console.log("totalvalue =>", totalvalue)
             //console.log("toAddress3 =>", toAddress3)
             //console.log("toAddress_show_totalvalue =>" , toAddress)
-            // toAddress.(snap => { // ดึงค่าของผฦู้ที่ต้องการจะส่งไป
+            // toAddress.(snap => { // ??????????????????????????????
             //     toAddress2 = snap.val().address
             //     console.log("toAddress2 =>", toAddress2)
             // })
@@ -154,19 +158,19 @@ router.route('/send/:id/confirm')
             var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
             console.log("receipt =>", receipt)
             res.json(JSON.stringify(receipt.transactionHash))
-            database.ref('users').child(id).once("value", snapshot => {
-                if (snapshot.exists()) { // check ว่ามีการสร้างแล้วหรือยัง
+            /*database.ref('users').child(id).once("value", snapshot => {
+                if (snapshot.exists()) { // check ????????????????????????
                     console.log('Have_data')
                     database.ref('users').child(id).update({
-                       // balance: (req.headers.money+toAddress2.balance),
-                       balance: req.headers.money,
+                        // balance: (req.headers.money+toAddress2.balance),
+                        balance: req.headers.money,
                     }).then(() => {
                         console.log('push_perfect')
                     }).catch(e => {
                         console.log(e)
                     })
                 }
-            })
+            })*/
             // return receipt
         }
         Tranfer().then((result) => {
@@ -182,29 +186,67 @@ router.route('/showdata/:id')
     })
 router.route('/showdata/:id/confirm')
     .get((req, res) => {
+        //var test = req.headers.id;
+        console.log("==============================================================================================")
         var test = [];
         var leadsRef = database.ref('users');
         leadsRef.on('value', (snapshot) => {
             snapshot.forEach((childSnapshot) => {
                 var childData = childSnapshot.val();
-                console.log(childData)
+                console.log("childData ===>", childData)
                 test.push(childData)
+            });
+        });
+        res.json(JSON.stringify(test))
+        //==============================================================================================//
+        var test_Show = req.headers
+        //var test_Show1 = req.data
+        console.log("test_Show ===>", test_Show)
+    })
+
+
+
+//??????????????????????????? ??????? push ???? firebase ???? ??? ?? 
+router.route('/showdata_admin/:id/confirm')
+    .get((req, res) => {
+        //var test = req.headers.id;
+        console.log("==============================================================================================")
+        var test = [];
+        var leadsRef = database.ref('users');
+        leadsRef.on('value', (snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+                var childData = childSnapshot.val();
+                console.log("showdata_admin ===>", childData)
+                test.push(childData) // id , address , balance
             });
         });
         res.json(JSON.stringify(test))
     })
 
+
+
+
 router.route('/error')
     .get((req, res) => {
         res.render('error.html')
     })
-
+router.route('/test_admin/:id')
+    .get((req, res) => {
+        res.render('test_admin.html')
+    })
 router.route('/index/:id')
     .get((req, res) => {
         res.render('index.html')
     })
 router.route('/index/:id/confirm')
     .get((req, res) => {
+    })
+
+//profile.html
+
+router.route('/profile/:id')
+    .get((req, res) => {
+        res.render('profile.html')
     })
 
 router.route('/balance/:id')
@@ -215,7 +257,7 @@ router.route('/balance/:id/confirm')
     .get((req, res) => {
         web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
         function getERC20TokenBalance(tokenAddress, walletAddress, callback) {
-            var minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
+            let minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
             let contract = new web3.eth.Contract(minABI, tokenAddress);
             contract.methods.balanceOf(walletAddress).call((error, balance) => {
                 contract.methods.decimals().call((error, decimals) => {
@@ -238,8 +280,6 @@ router.route('/balance/:id/confirm')
             console.log("tokenAddress =>", tokenAddress)
             if (tokenAddress != "" && walletAddress != "") {
                 getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {
-                    // console.log(getERC20TokenBalance)
-                    // document.getElementById('result').innerText = balance.toString();
                 })
             }
         }
@@ -249,9 +289,74 @@ router.route('/balance/:id/confirm')
     })
 
 
-router.route('/getWalletById') // ดึงค่าจาก ฝั่ง front end ทีส่งค่ามา ทำงานในฟังกืช์่นนี้ เอามาใส่ในช่อง
+router.route('/balance_admin/:id/confirm')
+    .post((req, res) => {
+        web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
+        async function getERC20TokenBalance(tokenAddress, walletAddress, string, callback) {
+            var minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
+            let contract = new web3.eth.Contract(minABI, tokenAddress);
+            contract.methods.balanceOf(walletAddress).call((error, balance) => {
+                contract.methods.decimals().call((error, decimals) => {
+                    balance = balance / (10 ** decimals);
+                    console.log("decimals => ", decimals);
+                    console.log("balance => ", balance, "PSU");
+
+                    database.ref('users').child(string).once("value", snapshot => {
+                        if (snapshot.exists()) { // check ????????????????????????
+                            console.log('Have_data')
+                            database.ref('users').child(string).update({
+                                // balance: (req.headers.money+toAddress2.balance),
+                                balance: balance,
+                            }).then(() => {
+                                //res.json(JSON.stringify(balance))
+                                console.log('push_perfect')
+                            }).catch(e => {
+                                console.log(e)
+                            })
+                        }
+                    })
+                    // res.send(JSON.stringify(balance))
+                }).then(() => {
+                    console.log('complete_check_balance')
+                }).catch(e => {
+                    console.log(e)
+
+                });
+            });
+        }
+        async function onAddressChange(e) {
+            const string = req.headers.result_test;
+            // const string = req.headers.toaddress; // dataform ===> test_admin_textarea
+            //const show_req = req.header.id;
+            console.log("string", string)
+            const walletAddress = string.match(/(\d){10}/gm);
+            let tokenAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
+            console.log("walletAddress =>", walletAddress)
+            console.log("tokenAddress =>", tokenAddress)
+            for (let i in walletAddress) {
+                let response = await getReceiverWalletFromId(walletAddress[i])
+                let wallet = response.val()
+                console.log("wallet ===> ", wallet.address)
+                if (tokenAddress != "" && wallet.address != "") {
+                    getERC20TokenBalance(tokenAddress, wallet.address, string, (balance) => {
+                    })
+                }
+            }
+
+
+        }
+
+        onAddressChange((resolve, reject) => {
+            resolve(balance)
+        })
+
+    })
+
+
+
+router.route('/getWalletById')
     .get((req, res) => {
-        const id = req.headers.id; // รหัสนักศึกษา ผู้ส่ง
+        const id = req.headers.id;
         console.log("get", id)
         database.ref('users').child(id).once("value", snapshot => {
             res.send(JSON.stringify({
@@ -262,13 +367,91 @@ router.route('/getWalletById') // ดึงค่าจาก ฝั่ง front
     })
 
 
-router.route('/getProfileById') // ค้นหารายละเอียด ผู้ส่ง
+router.route('/sendadmin/:id')
     .get((req, res) => {
-        const id = req.headers.id; // รหัสนักศึกษา ผู้ส่ง
-        console.log("get", id)
+        res.render('sendadmin.html')
+    })
+router.route('/sendadmin/:id/confirm')
+    .get((req, res) => {
+        async function Tranfer() {
+            // const id = req.headers.toaddress;
+
+            const xx = req.headers;
+            console.log('xx: ', xx)
+            const string = req.headers.toaddress;
+            console.log("string = >", string)
+            var id = string.match(/(\d){10}/gm)
+            console.log("id for text_area ===>", id)
+            const fromAddress = req.headers.fromaddress;
+            const money = req.headers.money;
+            const privateKey = req.headers.privatekey;
+            //const testvalue = req.headers.result;
+            console.log("testvalue === >", req.header.value1)
+            console.log("fromAddress =>", fromAddress)
+            console.log("money =>", money)
+            console.log("privateKey =>", privateKey)
+            //console.log("totalvalue =>", totalvalue)
+            web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
+            var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
+            var count = await web3.eth.getTransactionCount(fromAddress);
+            //var count = await Web3.eth.getTransactionCount(fromAddress,'pending');
+            var contractAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
+            var contract = new web3.eth.Contract(abi, contractAddress, { from: fromAddress });
+            var weiTokenAmount = web3.utils.toWei(String(money), 'ether');
+            var privKey = Buffer.from(privateKey, 'hex');
+
+            for (let i in id) {
+                let response = await getReceiverWalletFromId(id[i]) //5935512088
+                let wallet = response.val()
+                var Transaction = {
+                    "from": fromAddress,
+                    "nonce": "0x" + (count++).toString(16),
+                    "gasPrice": "0x003B9ACA00",
+                    "gasLimit": "0x250CA",//151754+
+                    "to": contractAddress,
+                    "value": "0x0",
+                    "data": contract.methods.transfer(wallet.address, weiTokenAmount).encodeABI(),
+                    "chainId": 0x03
+                };
+                console.log("privKey = > ", privKey);
+                const tx = new EthereumTx(Transaction, { chain: 'kovan' });
+                tx.sign(privKey);
+                var serializedTx = tx.serialize();
+                console.log("serializedTx =>", serializedTx)
+                var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+                console.log("receipt =>", receipt)
+                //res.json(JSON.stringify(receipt.transactionHash))
+                /*database.ref('users').child(id[i]).once("value", snapshot => {
+                    if (snapshot.exists()) { // check ????????????????????????
+                        console.log('Have_data')
+                        database.ref('users').child(id[i]).update({
+                            // balance: (req.headers.money+toAddress2.balance),
+                            balance: req.headers.money,
+                        }).then(() => {
+                            console.log('push_perfect')
+                        }).catch(e => {
+                            console.log(e)
+                        })
+                    }
+                })*/
+                // console.log("finish" + (i + 1))
+            }
+
+        }
+        Tranfer().then((result) => {
+            console.log(result)
+        })
+
+    })
+
+router.route('/getProfileById')
+    .get((req, res) => {
+        const id = req.headers.id;
+        console.log("id_toaddress", id)
         database.ref('users').child(id).once("value", snapshot => {
             if (snapshot.val()) {
                 const data = snapshot.val().name.GetStaffDetailsResult.string
+                //console.log("data", data)
                 res.send(JSON.stringify({
                     id: data[0],
                     name: data[1],
@@ -284,22 +467,24 @@ router.route('/getProfileById') // ค้นหารายละเอียด
         })
     })
 
-router.route('/getProfileforbalance') // ค้นหารายละเอียด ผู้ส่ง
+router.route('/getProfileforbalance') // ??????????????? ??????
     .get((req, res) => {
-        const id = req.headers.id; // รหัสนักศึกษา ผู้ส่ง
+        const id = req.headers.id; // ???????????? ??????
         console.log("get", id)
         database.ref('users').child(id).once("value", snapshot => {
             if (snapshot.val()) {
                 const data = snapshot.val().balance
                 res.send(JSON.stringify(data))
-            } else {
-                console.log(err)
             }
+            //else {
+            // console.log(err)
+            // }
         })
 
     })
 
 async function getReceiverWalletFromId(id) {
+    console.log("id in getReceiverWalletFromId", id); //id ??? ??????????????? Toaddress ???????????????????
     return await database.ref('users').child(id).once("value")
     // console.log("getReceiverWalletFromId = >",id)
 }

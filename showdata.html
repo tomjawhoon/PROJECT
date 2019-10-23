@@ -45,43 +45,21 @@
     <table>
         <div class="jumbotron">
             <h2>Profile</h2>
-            <button type="button" class="btn btn-danger"><a href="/">BACK</a></button>
+            <button type="submit" class="btn btn-danger">BACK</button>
             <table>
-                <tr>
-                    <th>Student_id</th>
-                    <th>Wallet_address</th>
-                    <th>Balance</th>
-                    <th>Token</th>
-                    <th>type</th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Student_id</th>
+                        <th>Wallet_address</th>
+                        <th>Balance</th>
+                        <th>Token</th>
+                        <th>type</th>
+                    </tr>
+                </thead>
                 <!-- <% data.forEach(function(data) { %> -->
-                <tr>
-                    <td>
-                        <a id="showid"></a>
-                    </td>
-                    <td>
-                        <!-- <%= data.device_id %> -->
-                    </td>
-                    <td>
-            
-                        
-                    
-                    </td>
-                    <td>
-                        <h5> PSU COIN</h5>
-                    </td>
-                    <td>
-                        <form>
-                            <button type="button" class="btn btn-info"
-                                onclick="window.location.href='/user/update?id=<%= data.id %>'">edit</button>
-                        </form>
-                        <form>
-                            <button type="button" class="btn btn-danger"
-                                onclick="myClick('<%= data.id %>')">delete</button>
-                        </form>
-                    </td>
+                <tbody id="ex-table">
+                </tbody>
 
-                </tr>
                 <!-- <% }); %> -->
             </table>
 
@@ -125,42 +103,67 @@
     var id;
     (() => {
         url = window.location.href
-        id = url.split('/').slice(-1).toString() // ไอดี ของผู้ login
+        id = url.split('/').slice(-1).toString() // ???? ?????? login
     })()
     axios({
         method: 'GET',
-        // url: '/getWalletById', //ส่งไปค่านี้
-        url: '/showdata/' + id + '/confirm', // ส่งไปยังค่านี้
+        // url: '/getWalletById', //???????????
+        url: '/showdata/' + id + '/confirm',
+        //url: '/balance/' + id + '/confirm', // ??????????????
         headers: {
-            id: id  // รหัสนักศึกษา
+            id: id,
+            //result : result,
         }
-    }).then(result => { // ดึงค่ามาใส่ใน input ด้วย axios โดยตรง
-        console.log("result_formaxios_getWalletById", result)
-        console.log("result_formaxios_data", result.data)
-        // console.log("result_formaxios_getWalletById", result.config.headers.id)
-        // $('#fromAddress').val(result.data.address)
-        // $('#showid').val(result.data)
-       //  $('#showid').text(result.data)
-    }).catch(result => {
-        console.log("errr")
-    })
-//   document.querySelector('#submitSend').addEventListener('submit', e => {
-//     e.preventDefault()
-//     axios({ // ส่งค่าทั้งหมดไปๆ ยัง ฝั่ง nodejs
-//       method: 'GET',
-//       url: '/balance/' + id + '/confirm', // ส่งไปยังค่านี้
-//       headers: {
-//         fromAddress: $('#fromAddress').val(),
-//       }
-//     }).then(result => { // ดึงค่ามาใส่ใน input ด้วย axios โดยตรง
-//       console.log("Retuen_value_balance", result)
-//       console.log("test_send => ",result.data)
-//       // $('#fromAddress').val(result.data.address)
-//       $('#result').text(result.data)
-//     }).catch(result => {
-//       console.log("errr")
-//     })
-//   })
+    }).then(result => {
+        //console.log("result_showdata", result.data)
+        JSON.parse(result.data).forEach(function (result) {
+            //console.log("result_showdata_id", result.name.GetStaffDetailsResult.string[0])
+            //console.log("result_showdata_address", result.address)
+            console.log("result_showdata", result)
+            const data = result.name.GetStaffDetailsResult.string[0]
+            console.log("data.........................", data)
+            axios({
+                method: 'POST',
+                url: '/balance_admin/' + id + '/confirm',
+                headers: {
+                    result_test: data,
+                }
+            })
+        })
+    });
+
+
+    axios({
+        method: 'GET',
+        // url: '/getWalletById', //???????????
+        url: '/showdata_admin/' + id + '/confirm',
+        //url: '/balance/' + id + '/confirm', // ??????????????
+        headers: {
+            id: id,  // ????????????
+        }
+    }).then(result => { // ?????? firebase ????????????????
+        JSON.parse(result.data).forEach(function (result) {
+            console.log(result)
+            //console.log("1111",result.address)
+            var tr = document.createElement('tr')
+            tr.innerHTML = `
+                <td>${result.name.GetStaffDetailsResult.string[0]}</td>
+                <td>${result.address}</td>
+                <td>${result.balance}</td>
+                <td>PSU</td>
+                <td>
+                    <div class="row">
+                    <button type="button" class="btn btn-info ml-2"
+                        onclick="window.location.href='/user/update?id=${result.address}'">edit</button>
+                    <button type="button" class="btn btn-danger ml-2"
+                        onclick="myClick(${result.address})">delete</button>
+                        </div>
+                </td>
+            `
+            document.querySelector('#ex-table').append(tr)
+        })
+    });
+
 </script>
 
 

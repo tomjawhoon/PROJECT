@@ -9,7 +9,7 @@
 
 #Right{
     float: right;
-    width: 200px;
+    width: 700px;
     height: 150px;
 }
 
@@ -46,7 +46,7 @@ body {
     height: 500px;
     margin-top: auto;
     margin-bottom: auto;
-    width: 600px;
+    width: 970px;
     background-color: rgba(66, 64, 64, 0.5) !important;
 }
 
