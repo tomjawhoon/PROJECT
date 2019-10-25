@@ -45,7 +45,7 @@
     <table>
         <div class="jumbotron">
             <h2>Profile</h2>
-            <button type="submit" class="btn btn-danger">BACK</button>
+            <button type="submit" class="btn btn-danger" onclick="gotoindex()" >BACK</button>
             <table>
                 <thead>
                     <tr>
@@ -90,12 +90,14 @@
     crossorigin="anonymous"></script>
 <script>
     function gotoSendETH() {
-        window.location.href = window.location.href.replace('balance', 'send', 'index')
+        window.location.href = window.location.href.replace('showdata', 'index', 'index')
     }
 
     function gotoindex() {
-        window.location.href = url.replace('balance', 'index', 'send')
+        // window.location.href = url.replace('send', 'balance')
+        window.location.href = url.replace('showdata', 'index', 'send')
     }
+
 </script>
 
 <script>
@@ -152,12 +154,6 @@
                 <td>${result.balance}</td>
                 <td>PSU</td>
                 <td>
-                    <div class="row">
-                    <button type="button" class="btn btn-info ml-2"
-                        onclick="window.location.href='/user/update?id=${result.address}'">edit</button>
-                    <button type="button" class="btn btn-danger ml-2"
-                        onclick="myClick(${result.address})">delete</button>
-                        </div>
                 </td>
             `
             document.querySelector('#ex-table').append(tr)

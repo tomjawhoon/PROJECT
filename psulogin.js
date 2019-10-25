@@ -62,15 +62,14 @@ router.route('/')
                         var user_eth = account.create();
                         console.log("Show_profile ", response)
                         database.ref('users').child(user.username).once("value", snapshot => {
-                            if (snapshot.exists()) { // check ????????????????????????
+                            if (snapshot.exists()) { // check
                                 console.log('already exists')
                                 // res.send('<script>alert("??????????????????");</script>');
                                 res.redirect('/index/' + user.username)
                                 return false;
                             } else {
-                                console.log('bad bad')
-                                // ?????????????????????????????? 
-                                database.ref('users').child(user.username).push({
+                                console.log('Push_NewProfile')
+                                database.ref('users').child(user.username).set({
                                     address: user_eth.address,
                                     privateKey: user_eth.privateKey.substring(2).toUpperCase(),
                                     balance: "",
@@ -179,6 +178,82 @@ router.route('/send/:id/confirm')
 
     })
 
+router.route('/sendadmin/:id')
+    .get((req, res) => {
+        res.render('sendadmin.html')
+    })
+router.route('/sendadmin/:id/confirm')
+    .get((req, res) => {
+        async function Tranfer() {
+            // const id = req.headers.toaddress;
+
+            const xx = req.headers;
+            console.log('xx: ', xx)
+            const string = req.headers.toaddress;
+            console.log("string = >", string)
+            var id = string.match(/(\d){10}/gm)
+            console.log("id for text_area ===>", id)
+            const fromAddress = req.headers.fromaddress;
+            const money = req.headers.money;
+            const privateKey = req.headers.privatekey;
+            //const testvalue = req.headers.result;
+            console.log("testvalue === >", req.header.value1)
+            console.log("fromAddress =>", fromAddress)
+            console.log("money =>", money)
+            console.log("privateKey =>", privateKey)
+            //console.log("totalvalue =>", totalvalue)
+            web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
+            var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
+            var count = await web3.eth.getTransactionCount(fromAddress);
+            //var count = await Web3.eth.getTransactionCount(fromAddress,'pending');
+            var contractAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
+            var contract = new web3.eth.Contract(abi, contractAddress, { from: fromAddress });
+            var weiTokenAmount = web3.utils.toWei(String(money), 'ether');
+            var privKey = Buffer.from(privateKey, 'hex');
+
+            for (let i in id) {
+                let response = await getReceiverWalletFromId(id[i]) //5935512088
+                let wallet = response.val()
+                var Transaction = {
+                    "from": fromAddress,
+                    "nonce": "0x" + (count++).toString(16),
+                    "gasPrice": "0x003B9ACA00",
+                    "gasLimit": "0x250CA",//151754+
+                    "to": contractAddress,
+                    "value": "0x0",
+                    "data": contract.methods.transfer(wallet.address, weiTokenAmount).encodeABI(),
+                    "chainId": 0x03
+                };
+                console.log("privKey = > ", privKey);
+                const tx = new EthereumTx(Transaction, { chain: 'kovan' });
+                tx.sign(privKey);
+                var serializedTx = tx.serialize();
+                console.log("serializedTx =>", serializedTx)
+                var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+                console.log("receipt =>", receipt)
+                //res.json(JSON.stringify(receipt.transactionHash))
+                /*database.ref('users').child(id[i]).once("value", snapshot => {
+                    if (snapshot.exists()) { // check ????????????????????????
+                        console.log('Have_data')
+                        database.ref('users').child(id[i]).update({
+                            // balance: (req.headers.money+toAddress2.balance),
+                            balance: req.headers.money,
+                        }).then(() => {
+                            console.log('push_perfect')
+                        }).catch(e => {
+                            console.log(e)
+                        })
+                    }
+                })*/
+                // console.log("finish" + (i + 1))
+            }
+
+        }
+        Tranfer().then((result) => {
+            console.log(result)
+        })
+
+    })
 
 router.route('/showdata/:id')
     .get((req, res) => {
@@ -357,7 +432,7 @@ router.route('/balance_admin/:id/confirm')
 router.route('/getWalletById')
     .get((req, res) => {
         const id = req.headers.id;
-        console.log("get", id)
+        console.log("get_getWalletById", id)
         database.ref('users').child(id).once("value", snapshot => {
             res.send(JSON.stringify({
                 address: snapshot.val().address,
@@ -367,97 +442,25 @@ router.route('/getWalletById')
     })
 
 
-router.route('/sendadmin/:id')
-    .get((req, res) => {
-        res.render('sendadmin.html')
-    })
-router.route('/sendadmin/:id/confirm')
-    .get((req, res) => {
-        async function Tranfer() {
-            // const id = req.headers.toaddress;
 
-            const xx = req.headers;
-            console.log('xx: ', xx)
-            const string = req.headers.toaddress;
-            console.log("string = >", string)
-            var id = string.match(/(\d){10}/gm)
-            console.log("id for text_area ===>", id)
-            const fromAddress = req.headers.fromaddress;
-            const money = req.headers.money;
-            const privateKey = req.headers.privatekey;
-            //const testvalue = req.headers.result;
-            console.log("testvalue === >", req.header.value1)
-            console.log("fromAddress =>", fromAddress)
-            console.log("money =>", money)
-            console.log("privateKey =>", privateKey)
-            //console.log("totalvalue =>", totalvalue)
-            web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
-            var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
-            var count = await web3.eth.getTransactionCount(fromAddress);
-            //var count = await Web3.eth.getTransactionCount(fromAddress,'pending');
-            var contractAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
-            var contract = new web3.eth.Contract(abi, contractAddress, { from: fromAddress });
-            var weiTokenAmount = web3.utils.toWei(String(money), 'ether');
-            var privKey = Buffer.from(privateKey, 'hex');
-
-            for (let i in id) {
-                let response = await getReceiverWalletFromId(id[i]) //5935512088
-                let wallet = response.val()
-                var Transaction = {
-                    "from": fromAddress,
-                    "nonce": "0x" + (count++).toString(16),
-                    "gasPrice": "0x003B9ACA00",
-                    "gasLimit": "0x250CA",//151754+
-                    "to": contractAddress,
-                    "value": "0x0",
-                    "data": contract.methods.transfer(wallet.address, weiTokenAmount).encodeABI(),
-                    "chainId": 0x03
-                };
-                console.log("privKey = > ", privKey);
-                const tx = new EthereumTx(Transaction, { chain: 'kovan' });
-                tx.sign(privKey);
-                var serializedTx = tx.serialize();
-                console.log("serializedTx =>", serializedTx)
-                var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
-                console.log("receipt =>", receipt)
-                //res.json(JSON.stringify(receipt.transactionHash))
-                /*database.ref('users').child(id[i]).once("value", snapshot => {
-                    if (snapshot.exists()) { // check ????????????????????????
-                        console.log('Have_data')
-                        database.ref('users').child(id[i]).update({
-                            // balance: (req.headers.money+toAddress2.balance),
-                            balance: req.headers.money,
-                        }).then(() => {
-                            console.log('push_perfect')
-                        }).catch(e => {
-                            console.log(e)
-                        })
-                    }
-                })*/
-                // console.log("finish" + (i + 1))
-            }
-
-        }
-        Tranfer().then((result) => {
-            console.log(result)
-        })
-
-    })
 
 router.route('/getProfileById')
     .get((req, res) => {
         const id = req.headers.id;
-        console.log("id_toaddress", id)
+        console.log("id_toaddress_getProfileById", id)
         database.ref('users').child(id).once("value", snapshot => {
+            console.log("snapshot", snapshot.val())
+            //console.log("snapshot_name", snapshot.val().name)
             if (snapshot.val()) {
                 const data = snapshot.val().name.GetStaffDetailsResult.string
-                //console.log("data", data)
+                console.log("data_getProfileById", data)
                 res.send(JSON.stringify({
                     id: data[0],
                     name: data[1],
                     lastName: data[2]
                 }))
             } else {
+                console.log("ERROR_getProfileById")
                 res.send(JSON.stringify({
                     id: '',
                     name: '',

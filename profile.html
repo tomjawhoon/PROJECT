@@ -42,7 +42,7 @@
             <!-- <h5>FORM Address</h5> -->
             <div id="containerLeft">
               <div class="form-group">
-                <p>Profile (card-img-top):</p>
+                <!-- <p>Profile (card-img-top):</p> -->
                 <img class="card-img-top" src="/front/img/portfolio/fullsize/img_avatar1.png" alt="Card image"
                   style="width:100%">
                 <center>
@@ -61,7 +61,7 @@
                 <input id="receiverLastName" type="text" class="form-control" size="80"></input><br>
                 <input id="showid" type="text" class="form-control" size="80"></input><br>
                 <input id="fromAddress" type="text" class="form-control" size="80"></input><br>
-                <input id="privateKey" type="text" class="form-control" size="80"></input><br>
+                <input id="privateKey" type="text" class="form-control" size="80" placeholder="PrivateKey"></input><br>
 
 
 
@@ -137,9 +137,9 @@
     }
   }).then(result => { // ดึงค่ามาใส่ใน input ด้วย axios โดยตรง
     console.log("result_data", result)
-    console.log("result_data", result.data.address)
-    console.log("result_data", result.data.privateKey)
-    console.log("result_data", result.config.headers.id)
+    console.log("result_address", result.data.address)
+    console.log("result_privateKey", result.data.privateKey)
+    console.log("result_id", result.config.headers.id)
 
     $('#fromAddress').val(result.data.address)
     // $('#privateKey').val(result.data.privateKey)
