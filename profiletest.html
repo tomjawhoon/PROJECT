@@ -23,12 +23,11 @@
               <!-- <li class="nav-item">
                 <a class="nav-link js-scroll-trigger" onclick="gotoindex()">Tranfers</a>
               </li> -->
-
               <li class="nav-item">
                 <a class="nav-link js-scroll-trigger" onclick="gotoCheckBalance()">Balance</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link js-scroll-trigger" onclick="gotoprofile()">Profile</a>
+                <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
               </li>
             </ul>
           </div>
@@ -83,15 +82,14 @@ table {
                     <thead>
                         <tr class="filters">
                             <th><input type="text" class="form-control" placeholder="Student ID" disabled></th>
-                            <th><input type="text" class="form-control" placeholder="Wallet" disabled></th>
-                            <th><input type="text" class="form-control" placeholder="Balance" disabled></th>
-                            <th><input type="text" class="form-control" placeholder="PSUCOIN" disabled></th>
+                            <th><input type="text" class="form-control" placeholder="First Name" disabled></th>
+                            <th><input type="text" class="form-control" placeholder="Last Name" disabled></th>
+                            <th><input type="text" class="form-control" placeholder="Username" disabled></th>
                         </tr>
                     </thead>
                     <tbody id="ex-table" >
                         <thead>
                             <tr>
-           
                             </tr>
                         </thead>          
                     </tbody>
@@ -130,16 +128,12 @@ table {
 <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
     crossorigin="anonymous"></script>
 <script>
-    function gotoCheckBalance() {
-        window.location.href = window.location.href.replace('showdata', 'balance', '')
+    function gotoSendETH() {
+        window.location.href = window.location.href.replace('balance', 'send', 'index')
     }
 
     function gotoindex() {
-        window.location.href = url.replace('showdata', 'index', 'send')
-    }
-
-    function gotoprofile() {
-        window.location.href = url.replace('showdata', 'profile', 'send')
+        window.location.href = url.replace('balance', 'index', 'send')
     }
 </script>
 
@@ -148,7 +142,14 @@ table {
 
 
   // Your web app's Firebase configuration
+ 
 
+    var url;
+    var id;
+    (() => {
+        url = window.location.href
+        id = url.split('/').slice(-1).toString() // ???? ?????? login
+    })()
    /* axios({
         method: 'GET',
         // url: '/getWalletById', //???????????
@@ -176,28 +177,6 @@ table {
             })
         })
     });*/
-
-
-    var url;
-    var id;
-    (() => {
-        url = window.location.href
-        id = url.split('/').slice(-1).toString() // ไอดี ของผู้ login
-    })()
-
-    axios({
-    method: 'GET',
-    url: '/getWalletById', //ส่งไปค่านี้
-    headers: {
-      id: id  // รหัสนักศึกษา
-    }
-  }).then(result => { // ดึงค่ามาใส่ใน input ด้วย axios โดยตรง
-    console.log("result_data", result)
-    $('#fromAddress').val(result.data.address)
-    $('#privateKey').val(result.data.privateKey)
-    $('#showid').val(result.config.headers.id)
-  })
-
    // <!--===============================================================================================-->
     var firebaseConfig = {
     apiKey: "AIzaSyDPwR_Tlxe5MODIEPugWCnO_drEh6-4jjw",
@@ -209,33 +188,26 @@ table {
     appId: "1:152285332333:web:bc428892887d5004"
 };
     firebase.initializeApp(firebaseConfig);
-
    // <!--===============================================================================================-->
         const database = firebase.database();
         var leadsRef = database.ref('users');
        // console.log("leadsRef ===>", leadsRef)
         leadsRef.on('value', (snapshot) => {
             snapshot.forEach((childSnapshot) => {
-     
                 var childData = childSnapshot.val();
                 console.log("showdata_admin_form_ui ===>", childData)
-                    var tr = document.createElement('tr')
-                        tr.innerHTML = `
-                        <td>${childData.name.GetStaffDetailsResult.string[0]}</td>
-                        <td>${childData.address}</td>
-                        <td>${childData.balance}</td>
-                        <td>PSU</td>
-        
-                    `
-                    $(document).ready(() => { 
-                       document.querySelector('#ex-table').append(tr) //อัพ    
-                     });  
-
-                       $("#ex-table").html("") //ลบ
-                        //console.log("remove data")      
-
-   // <!--===============================================================================================-->               
-            const data = childData.name.GetStaffDetailsResult.string[0] //5935512088 < ==== เฉพาะ ID
+                var tr = document.createElement('tr')
+                tr.innerHTML = `
+                <td>${childData.name.GetStaffDetailsResult.string[0]}</td>
+                <td>${childData.address}</td>
+                <td>${childData.balance}</td>
+                <td>PSU</td>
+ 
+            `
+            document.querySelector('#ex-table').append(tr)
+    // <!--===============================================================================================-->
+                //console.log("childData", childData)
+                const data = childData.name.GetStaffDetailsResult.string[0] //5935512088 < ==== เฉพาะ ID
                 console.log("data......", data)
                     axios({
                     method: 'POST',
@@ -244,27 +216,11 @@ table {
                         result_test: data,
                     }
                 })
+        
+     
             })
-        }) 
-// <!--============================================================================================
-       
-            
-          
-                //   document.querySelector('#ex-table').html()
-              
-
-
-      
-                  
-//             $(document).ready(function(){
-//                         $("#ex-table").remove();
-//                         console.log("remove data")
-
-// });
-            
-
-    // <!--===============================================================================================-->
-                //console.log("childData", childData)
+   // <!--===============================================================================================-->
+        })
 
  // <!--===============================================================================================-->
         $(document).ready(function(){
@@ -293,19 +249,19 @@ table {
         column = $panel.find('.filters th').index($input.parents('th')),
         $table = $panel.find('.table'),
         $rows = $table.find('tbody tr');
-
+        /* Dirtiest filter function ever ;) */
         var $filteredRows = $rows.filter(function(){
             var value = $(this).find('td').eq(column).text().toLowerCase();
             return value.indexOf(inputContent) === -1;
         });
-     
+        /* Clean previous no-result if exist */
         $table.find('tbody .no-result').remove();
         /* Show all rows, hide filtered ones (never do that outside of a demo ! xD) */
         $rows.show();
         $filteredRows.hide();
         /* Prepend no-result row if all rows are filtered */
         if ($filteredRows.length === $rows.length) {
-            $table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ $table.find('.filters th').length +'">No data......</td></tr>'));
+            $table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ $table.find('.filters th').length +'">No result found</td></tr>'));
         }
     });
 });

@@ -92,10 +92,51 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-8 text-center">
-          <h2 class="text-white mt-0">About</h2>
+
+          <style>
+              table {
+                  font-family: arial, sans-serif;
+                  border-collapse: collapse;
+                  width: 100%;
+              }
+      
+              td,
+              th {
+                  border: 1px solid #dddddd;
+                  text-align: left;
+                  padding: 8px;
+              }
+      
+              tr:nth-child(even) {
+                  background-color: #216dcf;
+              }
+          </style>
+          <table>
+              <div class="container">
+         
+                  <h2 class="text-uppercase text-white font-weight-bold" >TOP PSU COIN</h2>
+                  <table>
+                      <thead class=" text-white font-weight-bold">
+                          <tr>
+                              <th>Student_id</th>
+        
+                              <th>Balance</th>
+                              <th>Token</th>
+  
+                          </tr>
+                      </thead >
+                      <!-- <% data.forEach(function(data) { %> -->
+                      <tbody id="ex-table" class="text-uppercase text-white font-weight-bold">
+                      </tbody>
+      
+                      <!-- <% }); %> -->
+                  </table>
+      
+              </div>
+          </table>
+          
           <hr class="divider light my-4">
-          <p class="text-white-50 mb-4">Start Bootstrap has everything you need to get your new website up and running
-            in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!
+          <p class="text-white-50 mb-4">
           </p>
           <a class="btn btn-light btn-xl js-scroll-trigger" href="#services">Get Started!</a>
         </div>
@@ -344,7 +385,7 @@
       //   // $('#privateKey').val(result.data.privateKey)
       // })
 
-      document.querySelector('#submitSend').addEventListener('submit', e => {
+     /* document.querySelector('#submitSend').addEventListener('submit', e => {
         e.preventDefault()
         axios({ // ส่งค่าทั้งหมดไปๆ ยัง ฝั่ง nodejs
           method: 'GET',
@@ -354,9 +395,80 @@
 
           }
         })
-      })
+      })*/
     </script>
 
 </body>
+
+<script>
+/*axios({
+        method: 'GET',
+        // url: '/getWalletById', //???????????
+        url: '/showdata/' + id + '/confirm',
+        //url: '/balance/' + id + '/confirm', // ??????????????
+        headers: {
+            id: id,
+            //result : result,
+        }
+    }).then(result => {
+
+       console.log("result_showdata",  JSON.parse(result))
+        JSON.parse(result.data).forEach( function (result) {
+
+            console.log("result_showdata_id", result.name.GetStaffDetailsResult.string[0])
+            //console.log("result_showdata_address", result.address)
+           // console.log("result_showdata", result)
+            const data = result.name.GetStaffDetailsResult.string[0] //5935512088 < ==== เฉพาะ ID
+            const balance = 
+            console.log("BALANCE", result.name.GetStaffDetailsResult.string[0] )
+            console.log("ID", data)
+            var tr = document.createElement('tr')
+                tr.innerHTML = `
+                <td>${result.name.GetStaffDetailsResult.string[0]}</td>
+                <td>${result.address}</td>
+                <td>${result.balance}</td>
+                <td>PSU</td>
+               
+            `
+            document.querySelector('#ex-table').append(tr)
+
+        })
+    });*/
+
+
+    axios({
+        method: 'GET',
+        // url: '/getWalletById', //???????????
+        url: '/showdata/' + id + '/confirm',
+        //url: '/balance/' + id + '/confirm', // ??????????????
+        headers: {
+            id: id,
+            //result : result,
+        }
+    }).then(result => {
+        //console.log("result_showdata", result.data)
+        JSON.parse(result.data).forEach( function (result) {
+          //Math.max
+            console.log("result_showdata_id", result.name.GetStaffDetailsResult.string[0])
+            console.log("result_showdata_address", result.address)
+          //  console.log("MAX", Math.max(result.balance))
+            //var test = [1 ,2 ,3 ,4];
+           // test.push(result.balance)
+            //Math.max(result.balance)
+           // console.log("MAX ===",Math.max(test))
+          //  console.log("result_showdata", result)
+            const data = result.name.GetStaffDetailsResult.string[0] //5935512088 < ==== เฉพาะ ID
+            console.log("data......", data)
+            var tr = document.createElement('tr')
+                tr.innerHTML = `
+                <td>${result.name.GetStaffDetailsResult.string[0]}</td>
+                <td>${result.balance}</td>
+                <td>PSU</td>
+               
+            `
+            document.querySelector('#ex-table').append(tr)
+        })
+    });
+</script>
 
 </html>

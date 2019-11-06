@@ -1907,7 +1907,7 @@ pre code {
 }
 
 .table-hover .table-active:hover {
-  background-color: rgba(0, 0, 0, 0.075);
+  background-color: rgba(175, 31, 31, 0.075);
 }
 
 .table-hover .table-active:hover > td,
@@ -6922,17 +6922,17 @@ a.close.disabled {
 a.bg-primary:hover, a.bg-primary:focus,
 button.bg-primary:hover,
 button.bg-primary:focus {
-  background-color: #ee3e0d !important;
+  background-color: #b7c0cc !important;
 }
 
 .bg-secondary {
-  background-color: #6c757d !important;
+  background-color: #4b8ac2 !important;
 }
 
 a.bg-secondary:hover, a.bg-secondary:focus,
 button.bg-secondary:hover,
 button.bg-secondary:focus {
-  background-color: #545b62 !important;
+  background-color: #3674b3 !important;
 }
 
 .bg-success {

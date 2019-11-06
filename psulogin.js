@@ -11,7 +11,7 @@ const web3 = new Web3();
 const EthereumTx = require('ethereumjs-tx').Transaction;
 const Buffer = require('safer-buffer').Buffer;
 const cors = require('cors');
-
+// <!--===============================================================================================-->
 app.use(cors());
 var engines = require('consolidate');
 app.use('/api', router);
@@ -27,7 +27,7 @@ app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
 app.use(function (req, res, next) {
     console.log(req.body) // populated!
 })
-
+// <!--===============================================================================================-->
 var firebaseConfig = {
     apiKey: "AIzaSyDPwR_Tlxe5MODIEPugWCnO_drEh6-4jjw",
     authDomain: "login-psu-final.firebaseapp.com",
@@ -39,7 +39,7 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-
+// <!--===============================================================================================-->
 router.route('/')
     .get((req, res) => {
         res.render('PSULOGIN.html')
@@ -62,13 +62,14 @@ router.route('/')
                         var user_eth = account.create();
                         console.log("Show_profile ", response)
                         database.ref('users').child(user.username).once("value", snapshot => {
-                            if (snapshot.exists()) { // check
+                            if (snapshot.exists()) { // check ????????????????????????
                                 console.log('already exists')
                                 // res.send('<script>alert("??????????????????");</script>');
                                 res.redirect('/index/' + user.username)
                                 return false;
                             } else {
-                                console.log('Push_NewProfile')
+                                console.log('bad bad')
+                                // ?????????????????????????????? 
                                 database.ref('users').child(user.username).set({
                                     address: user_eth.address,
                                     privateKey: user_eth.privateKey.substring(2).toUpperCase(),
@@ -91,7 +92,7 @@ router.route('/')
             }
         });
     })
-
+// <!--===============================================================================================-->
 router.route('/send/:id')
     .get((req, res) => {
         res.render('tranfer.html')
@@ -177,7 +178,194 @@ router.route('/send/:id/confirm')
         })
 
     })
+// <!--===============================================================================================-->
 
+router.route('/showdata/:id')
+    .get((req, res) => {
+        res.render('showdata.html')
+    })
+router.route('/showdata/:id/confirm')
+    .get((req, res) => {
+        //var test = req.headers.id;
+        var test = [];
+        var leadsRef = database.ref('users');
+        leadsRef.on('value', (snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+                var childData = childSnapshot.val();
+                console.log("childData_formnode===>", childData)
+                test.push(childData)
+            });
+        });
+        res.json(JSON.stringify(test))
+        // var test_Show = req.headers
+        //var test_Show1 = req.data
+        // console.log("test_Show ===>", test_Show)
+    })
+
+// <!--===============================================================================================-->
+router.route('/showdata_admin/:id/confirm')
+    .get((req, res) => {
+        //var test = req.headers.id;
+        var test = [];
+        var leadsRef = database.ref('users');
+        leadsRef.on('value', (snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+                var childData = childSnapshot.val();
+                console.log("showdata_admin ===>", childData)
+                test.push(childData)
+                console.log("test ===>", test) // id , address , balance
+            });
+        });
+        res.json(JSON.stringify(test))
+    })
+
+// <!--===============================================================================================-->
+
+
+
+router.route('/error')
+    .get((req, res) => {
+        res.render('error.html')
+    })
+// <!--===============================================================================================-->
+router.route('/test_admin/:id')
+    .get((req, res) => {
+        res.render('test_admin.html')
+    })
+// <!--===============================================================================================-->
+router.route('/index/:id')
+    .get((req, res) => {
+        res.render('index.html')
+    })
+// <!--===============================================================================================-->
+router.route('/index/:id/confirm')
+    .get((req, res) => {
+    })
+// <!--===============================================================================================-->
+//profile.html
+
+router.route('/profile/:id')
+    .get((req, res) => {
+        res.render('profile.html')
+    })
+// <!--===============================================================================================-->
+router.route('/balance/:id')
+    .get((req, res) => {
+        res.render('balance.html')
+    })
+// <!--===============================================================================================-->
+router.route('/balance/:id/confirm')
+    .get((req, res) => {
+        web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
+        function getERC20TokenBalance(tokenAddress, walletAddress, callback) {
+            let minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
+            let contract = new web3.eth.Contract(minABI, tokenAddress);
+            contract.methods.balanceOf(walletAddress).call((error, balance) => {
+                contract.methods.decimals().call((error, decimals) => {
+                    balance = balance / (10 ** decimals);
+                    console.log("decimals => ", decimals);
+                    console.log("balance => ", balance, "PSU");
+                    res.json(JSON.stringify(balance))
+                    // res.send(JSON.stringify(balance))
+                }).then(() => {
+                    console.log('complete_check_balance')
+                }).catch(e => {
+                    console.log(e)
+                });
+            });
+        }
+        function onAddressChange(e) {
+            const walletAddress = req.headers.fromaddress;
+            let tokenAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
+            console.log("walletAddress =>", walletAddress)
+            console.log("tokenAddress =>", tokenAddress)
+            if (tokenAddress != "" && walletAddress != "") {
+                getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {
+                })
+            }
+        }
+        onAddressChange((resolve, reject) => {
+            resolve(balance)
+        })
+    })
+
+// <!--===============================================================================================-->
+router.route('/balance_admin/:id/confirm')
+    .post((req, res) => {
+        web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
+        async function getERC20TokenBalance(tokenAddress, walletAddress, string, callback) {
+            var minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
+            let contract = new web3.eth.Contract(minABI, tokenAddress);
+            contract.methods.balanceOf(walletAddress).call((error, balance) => {
+                contract.methods.decimals().call((error, decimals) => {
+                    balance = balance / (10 ** decimals);
+                    console.log("decimals => ", decimals);
+                    console.log("balance => ", balance, "PSU");
+                    
+                    database.ref('users').child(string).once("value", snapshot => {
+                        if (snapshot.exists()) { // check ????????????????????????
+                            //console.log('Have_data')
+                            database.ref('users').child(string).update({
+                                // balance: (req.headers.money+toAddress2.balance),
+                                balance: balance,
+                            }).then(() => {
+                                //res.json(JSON.stringify(balance))
+                                console.log('push_perfect')
+                            }).catch(e => {
+                                console.log(e)
+                            })
+                        }
+                    })
+                    // res.send(JSON.stringify(balance))
+                }).then(() => {
+                    console.log('complete_check_balance')
+                }).catch(e => {
+                    console.log(e)
+
+                });
+            });
+        }
+        async function onAddressChange(e) {
+            const string = req.headers.result_test;
+            // const string = req.headers.toaddress; // dataform ===> test_admin_textarea
+            //const show_req = req.header.id;
+            console.log("string", string)
+            const walletAddress = string.match(/(\d){10}/gm);
+            let tokenAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
+            console.log("walletAddress =>", walletAddress)
+            console.log("tokenAddress =>", tokenAddress)
+            for (let i in walletAddress) {
+                let response = await getReceiverWalletFromId(walletAddress[i])
+                let wallet = response.val()
+                console.log("wallet ===> ", wallet.address)
+                if (tokenAddress != "" && wallet.address != "") {
+                    getERC20TokenBalance(tokenAddress, wallet.address, string, (balance) => {
+                    })
+                }
+            }
+        }
+
+        onAddressChange((resolve, reject) => {
+            resolve(balance)
+        })
+
+    })
+
+// <!--===============================================================================================-->
+
+router.route('/getWalletById')
+    .get((req, res) => {
+        const id = req.headers.id;
+        console.log("get", id)
+        database.ref('users').child(id).once("value", snapshot => {
+            res.send(JSON.stringify({
+                address: snapshot.val().address,
+                privateKey: snapshot.val().privateKey,
+            }))
+        })
+    })
+
+// <!--===============================================================================================-->
 router.route('/sendadmin/:id')
     .get((req, res) => {
         res.render('sendadmin.html')
@@ -254,213 +442,21 @@ router.route('/sendadmin/:id/confirm')
         })
 
     })
-
-router.route('/showdata/:id')
-    .get((req, res) => {
-        res.render('showdata.html')
-    })
-router.route('/showdata/:id/confirm')
-    .get((req, res) => {
-        //var test = req.headers.id;
-        console.log("==============================================================================================")
-        var test = [];
-        var leadsRef = database.ref('users');
-        leadsRef.on('value', (snapshot) => {
-            snapshot.forEach((childSnapshot) => {
-                var childData = childSnapshot.val();
-                console.log("childData ===>", childData)
-                test.push(childData)
-            });
-        });
-        res.json(JSON.stringify(test))
-        //==============================================================================================//
-        var test_Show = req.headers
-        //var test_Show1 = req.data
-        console.log("test_Show ===>", test_Show)
-    })
-
-
-
-//??????????????????????????? ??????? push ???? firebase ???? ??? ?? 
-router.route('/showdata_admin/:id/confirm')
-    .get((req, res) => {
-        //var test = req.headers.id;
-        console.log("==============================================================================================")
-        var test = [];
-        var leadsRef = database.ref('users');
-        leadsRef.on('value', (snapshot) => {
-            snapshot.forEach((childSnapshot) => {
-                var childData = childSnapshot.val();
-                console.log("showdata_admin ===>", childData)
-                test.push(childData) // id , address , balance
-            });
-        });
-        res.json(JSON.stringify(test))
-    })
-
-
-
-
-router.route('/error')
-    .get((req, res) => {
-        res.render('error.html')
-    })
-router.route('/test_admin/:id')
-    .get((req, res) => {
-        res.render('test_admin.html')
-    })
-router.route('/index/:id')
-    .get((req, res) => {
-        res.render('index.html')
-    })
-router.route('/index/:id/confirm')
-    .get((req, res) => {
-    })
-
-//profile.html
-
-router.route('/profile/:id')
-    .get((req, res) => {
-        res.render('profile.html')
-    })
-
-router.route('/balance/:id')
-    .get((req, res) => {
-        res.render('balance.html')
-    })
-router.route('/balance/:id/confirm')
-    .get((req, res) => {
-        web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
-        function getERC20TokenBalance(tokenAddress, walletAddress, callback) {
-            let minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
-            let contract = new web3.eth.Contract(minABI, tokenAddress);
-            contract.methods.balanceOf(walletAddress).call((error, balance) => {
-                contract.methods.decimals().call((error, decimals) => {
-                    balance = balance / (10 ** decimals);
-                    console.log("decimals => ", decimals);
-                    console.log("balance => ", balance, "PSU");
-                    res.json(JSON.stringify(balance))
-                    // res.send(JSON.stringify(balance))
-                }).then(() => {
-                    console.log('complete_check_balance')
-                }).catch(e => {
-                    console.log(e)
-                });
-            });
-        }
-        function onAddressChange(e) {
-            const walletAddress = req.headers.fromaddress;
-            let tokenAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
-            console.log("walletAddress =>", walletAddress)
-            console.log("tokenAddress =>", tokenAddress)
-            if (tokenAddress != "" && walletAddress != "") {
-                getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {
-                })
-            }
-        }
-        onAddressChange((resolve, reject) => {
-            resolve(balance)
-        })
-    })
-
-
-router.route('/balance_admin/:id/confirm')
-    .post((req, res) => {
-        web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
-        async function getERC20TokenBalance(tokenAddress, walletAddress, string, callback) {
-            var minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
-            let contract = new web3.eth.Contract(minABI, tokenAddress);
-            contract.methods.balanceOf(walletAddress).call((error, balance) => {
-                contract.methods.decimals().call((error, decimals) => {
-                    balance = balance / (10 ** decimals);
-                    console.log("decimals => ", decimals);
-                    console.log("balance => ", balance, "PSU");
-
-                    database.ref('users').child(string).once("value", snapshot => {
-                        if (snapshot.exists()) { // check ????????????????????????
-                            console.log('Have_data')
-                            database.ref('users').child(string).update({
-                                // balance: (req.headers.money+toAddress2.balance),
-                                balance: balance,
-                            }).then(() => {
-                                //res.json(JSON.stringify(balance))
-                                console.log('push_perfect')
-                            }).catch(e => {
-                                console.log(e)
-                            })
-                        }
-                    })
-                    // res.send(JSON.stringify(balance))
-                }).then(() => {
-                    console.log('complete_check_balance')
-                }).catch(e => {
-                    console.log(e)
-
-                });
-            });
-        }
-        async function onAddressChange(e) {
-            const string = req.headers.result_test;
-            // const string = req.headers.toaddress; // dataform ===> test_admin_textarea
-            //const show_req = req.header.id;
-            console.log("string", string)
-            const walletAddress = string.match(/(\d){10}/gm);
-            let tokenAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
-            console.log("walletAddress =>", walletAddress)
-            console.log("tokenAddress =>", tokenAddress)
-            for (let i in walletAddress) {
-                let response = await getReceiverWalletFromId(walletAddress[i])
-                let wallet = response.val()
-                console.log("wallet ===> ", wallet.address)
-                if (tokenAddress != "" && wallet.address != "") {
-                    getERC20TokenBalance(tokenAddress, wallet.address, string, (balance) => {
-                    })
-                }
-            }
-
-
-        }
-
-        onAddressChange((resolve, reject) => {
-            resolve(balance)
-        })
-
-    })
-
-
-
-router.route('/getWalletById')
-    .get((req, res) => {
-        const id = req.headers.id;
-        console.log("get_getWalletById", id)
-        database.ref('users').child(id).once("value", snapshot => {
-            res.send(JSON.stringify({
-                address: snapshot.val().address,
-                privateKey: snapshot.val().privateKey,
-            }))
-        })
-    })
-
-
-
-
+// <!--===============================================================================================-->
 router.route('/getProfileById')
     .get((req, res) => {
         const id = req.headers.id;
-        console.log("id_toaddress_getProfileById", id)
+        console.log("id_toaddress", id)
         database.ref('users').child(id).once("value", snapshot => {
-            console.log("snapshot", snapshot.val())
-            //console.log("snapshot_name", snapshot.val().name)
             if (snapshot.val()) {
                 const data = snapshot.val().name.GetStaffDetailsResult.string
-                console.log("data_getProfileById", data)
+                //console.log("data", data)
                 res.send(JSON.stringify({
                     id: data[0],
                     name: data[1],
                     lastName: data[2]
                 }))
             } else {
-                console.log("ERROR_getProfileById")
                 res.send(JSON.stringify({
                     id: '',
                     name: '',
@@ -469,7 +465,7 @@ router.route('/getProfileById')
             }
         })
     })
-
+// <!--===============================================================================================-->
 router.route('/getProfileforbalance') // ??????????????? ??????
     .get((req, res) => {
         const id = req.headers.id; // ???????????? ??????
@@ -485,13 +481,13 @@ router.route('/getProfileforbalance') // ??????????????? ??????
         })
 
     })
-
+// <!--===============================================================================================-->
 async function getReceiverWalletFromId(id) {
     console.log("id in getReceiverWalletFromId", id); //id ??? ??????????????? Toaddress ???????????????????
     return await database.ref('users').child(id).once("value")
     // console.log("getReceiverWalletFromId = >",id)
 }
-
+// <!--===============================================================================================-->
 app.listen(8000, () => console.log('Server is ready!'))
 
 
