@@ -1,29 +1,28 @@
 /* Made with love by Mutiullah Samim*/
 
 @import url('https://fonts.googleapis.com/css?family=Numans');
-#containerRight{
+#containerRight {
     float: right;
     width: 200px;
     height: 150px;
 }
 
-#Right{
+#Right {
     float: right;
     width: 200px;
     height: 150px;
 }
 
-#containerLeft{
+#containerLeft {
     float: left;
     width: 200px;
     height: 150px;
 }
 
-#Left{
+#Left {
     float: left;
     width: 200px;
     height: 150px;
-    
 }
 
 html,
@@ -81,7 +80,6 @@ body {
 input:focus {
     outline: 0 0 0 0 !important;
     box-shadow: 0 0 0 0 !important;
-
 }
 
 .remember {

@@ -24,10 +24,10 @@ var firebase = require('firebase')
 app.use(bodyParser.urlencoded({ extended: true }), router)
 app.use(bodyParser.json, router)
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
-app.use(function (req, res, next) {
-    console.log(req.body) // populated!
-})
-// <!--===============================================================================================-->
+app.use(function(req, res, next) {
+        console.log(req.body) // populated!
+    })
+    // <!--===============================================================================================-->
 var firebaseConfig = {
     apiKey: "AIzaSyDPwR_Tlxe5MODIEPugWCnO_drEh6-4jjw",
     authDomain: "login-psu-final.firebaseapp.com",
@@ -56,20 +56,19 @@ router.route('/')
                     if (response.GetStaffDetailsResult.string[0] == "") {
                         res.redirect('/error')
                         console.error(err);
-                    }
-                    else {
+                    } else {
                         var account = new Web3EthAccounts('ws://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261');
                         var user_eth = account.create();
                         console.log("Show_profile ", response)
                         database.ref('users').child(user.username).once("value", snapshot => {
                             if (snapshot.exists()) { // check ????????????????????????
                                 console.log('already exists')
-                                // res.send('<script>alert("??????????????????");</script>');
+                                    // res.send('<script>alert("??????????????????");</script>');
                                 res.redirect('/index/' + user.username)
                                 return false;
                             } else {
                                 console.log('bad bad')
-                                // ?????????????????????????????? 
+
                                 database.ref('users').child(user.username).set({
                                     address: user_eth.address,
                                     privateKey: user_eth.privateKey.substring(2).toUpperCase(),
@@ -77,8 +76,8 @@ router.route('/')
                                     name: response,
                                 }).then(() => {
                                     console.log('create new wallet')
-                                    // console.log('test_Show',name)
-                                    // res.send({ user_eth, response });
+                                        // console.log('test_Show',name)
+                                        // res.send({ user_eth, response });
                                     res.redirect('/index/' + user.username)
                                     return false;
                                     // res.redirect("/showdata)                 
@@ -92,7 +91,7 @@ router.route('/')
             }
         });
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 router.route('/send/:id')
     .get((req, res) => {
         res.render('tranfer.html')
@@ -107,7 +106,7 @@ router.route('/send/:id/confirm')
             const fromAddress = req.headers.fromaddress;
             const money = req.headers.money;
             const privateKey = req.headers.privatekey;
-            //const testvalue = req.headers.result;
+            // const testvalue = req.headers.result;
 
             console.log('xx: ', req.headers)
             console.log("id", id)
@@ -126,12 +125,12 @@ router.route('/send/:id/confirm')
 
             console.log("toAddress2 =>", toAddress2)
             console.log("totalvalue =>", totalvalue)
-            //console.log("toAddress3 =>", toAddress3)
-            //console.log("toAddress_show_totalvalue =>" , toAddress)
-            // toAddress.(snap => { // ??????????????????????????????
-            //     toAddress2 = snap.val().address
-            //     console.log("toAddress2 =>", toAddress2)
-            // })
+                //console.log("toAddress3 =>", toAddress3)
+                //console.log("toAddress_show_totalvalue =>" , toAddress)
+                // toAddress.(snap => { // ??????????????????????????????
+                //     toAddress2 = snap.val().address
+                //     console.log("toAddress2 =>", toAddress2)
+                // })
 
             web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
             var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
@@ -143,7 +142,7 @@ router.route('/send/:id/confirm')
                 "from": fromAddress,
                 "nonce": "0x" + count.toString(16),
                 "gasPrice": "0x003B9ACA00",
-                "gasLimit": "0x250CA",//151754
+                "gasLimit": "0x250CA", //151754
                 "to": contractAddress,
                 "value": "0x0",
                 "data": contract.methods.transfer(toAddress2.address, weiTokenAmount).encodeABI(),
@@ -158,27 +157,27 @@ router.route('/send/:id/confirm')
             var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
             console.log("receipt =>", receipt)
             res.json(JSON.stringify(receipt.transactionHash))
-            /*database.ref('users').child(id).once("value", snapshot => {
-                if (snapshot.exists()) { // check ????????????????????????
-                    console.log('Have_data')
-                    database.ref('users').child(id).update({
-                        // balance: (req.headers.money+toAddress2.balance),
-                        balance: req.headers.money,
-                    }).then(() => {
-                        console.log('push_perfect')
-                    }).catch(e => {
-                        console.log(e)
-                    })
-                }
-            })*/
-            // return receipt
+            database.ref('users').child(id).once("value", snapshot => {
+                    if (snapshot.exists()) { // check ????????????????????????
+                        console.log('Have_data')
+                        database.ref('users').child(id).update({
+                            // balance: (req.headers.money+toAddress2.balance),
+                            balance: parseInt(req.headers.money) + parseInt(toAddress2.balance)
+                        }).then(() => {
+                            console.log('push_send_perfect')
+                        }).catch(e => {
+                            console.log(e)
+                        })
+                    }
+                })
+                // return receipt
         }
         Tranfer().then((result) => {
             console.log(result)
         })
 
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 
 router.route('/showdata/:id')
     .get((req, res) => {
@@ -197,9 +196,9 @@ router.route('/showdata/:id/confirm')
             });
         });
         res.json(JSON.stringify(test))
-        // var test_Show = req.headers
-        //var test_Show1 = req.data
-        // console.log("test_Show ===>", test_Show)
+            // var test_Show = req.headers
+            //var test_Show1 = req.data
+            // console.log("test_Show ===>", test_Show)
     })
 
 // <!--===============================================================================================-->
@@ -227,36 +226,36 @@ router.route('/error')
     .get((req, res) => {
         res.render('error.html')
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 router.route('/test_admin/:id')
     .get((req, res) => {
         res.render('test_admin.html')
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 router.route('/index/:id')
     .get((req, res) => {
         res.render('index.html')
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 router.route('/index/:id/confirm')
-    .get((req, res) => {
-    })
-// <!--===============================================================================================-->
-//profile.html
+    .get((req, res) => {})
+    // <!--===============================================================================================-->
+    //profile.html
 
 router.route('/profile/:id')
     .get((req, res) => {
         res.render('profile.html')
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 router.route('/balance/:id')
     .get((req, res) => {
         res.render('balance.html')
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 router.route('/balance/:id/confirm')
     .get((req, res) => {
         web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
+
         function getERC20TokenBalance(tokenAddress, walletAddress, callback) {
             let minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
             let contract = new web3.eth.Contract(minABI, tokenAddress);
@@ -266,7 +265,7 @@ router.route('/balance/:id/confirm')
                     console.log("decimals => ", decimals);
                     console.log("balance => ", balance, "PSU");
                     res.json(JSON.stringify(balance))
-                    // res.send(JSON.stringify(balance))
+                        // res.send(JSON.stringify(balance))
                 }).then(() => {
                     console.log('complete_check_balance')
                 }).catch(e => {
@@ -274,14 +273,14 @@ router.route('/balance/:id/confirm')
                 });
             });
         }
+
         function onAddressChange(e) {
             const walletAddress = req.headers.fromaddress;
             let tokenAddress = "0x0d01bc6041ac8f72e1e4b831714282f755012764";
             console.log("walletAddress =>", walletAddress)
             console.log("tokenAddress =>", tokenAddress)
             if (tokenAddress != "" && walletAddress != "") {
-                getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {
-                })
+                getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {})
             }
         }
         onAddressChange((resolve, reject) => {
@@ -296,27 +295,31 @@ router.route('/balance_admin/:id/confirm')
         async function getERC20TokenBalance(tokenAddress, walletAddress, string, callback) {
             var minABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
             let contract = new web3.eth.Contract(minABI, tokenAddress);
+            let sw;
             contract.methods.balanceOf(walletAddress).call((error, balance) => {
                 contract.methods.decimals().call((error, decimals) => {
                     balance = balance / (10 ** decimals);
                     console.log("decimals => ", decimals);
                     console.log("balance => ", balance, "PSU");
-                    
                     database.ref('users').child(string).once("value", snapshot => {
-                        if (snapshot.exists()) { // check ????????????????????????
-                            //console.log('Have_data')
-                            database.ref('users').child(string).update({
-                                // balance: (req.headers.money+toAddress2.balance),
-                                balance: balance,
-                            }).then(() => {
-                                //res.json(JSON.stringify(balance))
-                                console.log('push_perfect')
-                            }).catch(e => {
-                                console.log(e)
-                            })
-                        }
-                    })
-                    // res.send(JSON.stringify(balance))
+                            if (snapshot.exists()) { // check ????????????????????????
+                                //console.log('Have_data')
+                                database.ref('users').child(string).update({
+                                    // balance: (req.headers.money+toAddress2.balance),
+                                    balance: balance,
+                                }).then(() => {
+                                    //res.json(JSON.stringify(balance))
+
+                                    console.log('push_perfect')
+                                    res.redirect('/showdata');
+
+
+                                }).catch(e => {
+                                    console.log(e)
+                                })
+                            }
+                        })
+                        // res.send(JSON.stringify(balance))
                 }).then(() => {
                     console.log('complete_check_balance')
                 }).catch(e => {
@@ -339,8 +342,7 @@ router.route('/balance_admin/:id/confirm')
                 let wallet = response.val()
                 console.log("wallet ===> ", wallet.address)
                 if (tokenAddress != "" && wallet.address != "") {
-                    getERC20TokenBalance(tokenAddress, wallet.address, string, (balance) => {
-                    })
+                    getERC20TokenBalance(tokenAddress, wallet.address, string, (balance) => {})
                 }
             }
         }
@@ -389,7 +391,7 @@ router.route('/sendadmin/:id/confirm')
             console.log("fromAddress =>", fromAddress)
             console.log("money =>", money)
             console.log("privateKey =>", privateKey)
-            //console.log("totalvalue =>", totalvalue)
+                //console.log("totalvalue =>", totalvalue)
             web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
             var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
             var count = await web3.eth.getTransactionCount(fromAddress);
@@ -406,7 +408,7 @@ router.route('/sendadmin/:id/confirm')
                     "from": fromAddress,
                     "nonce": "0x" + (count++).toString(16),
                     "gasPrice": "0x003B9ACA00",
-                    "gasLimit": "0x250CA",//151754+
+                    "gasLimit": "0x250CA", //151754+
                     "to": contractAddress,
                     "value": "0x0",
                     "data": contract.methods.transfer(wallet.address, weiTokenAmount).encodeABI(),
@@ -419,21 +421,21 @@ router.route('/sendadmin/:id/confirm')
                 console.log("serializedTx =>", serializedTx)
                 var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
                 console.log("receipt =>", receipt)
-                //res.json(JSON.stringify(receipt.transactionHash))
-                /*database.ref('users').child(id[i]).once("value", snapshot => {
-                    if (snapshot.exists()) { // check ????????????????????????
-                        console.log('Have_data')
-                        database.ref('users').child(id[i]).update({
-                            // balance: (req.headers.money+toAddress2.balance),
-                            balance: req.headers.money,
-                        }).then(() => {
-                            console.log('push_perfect')
-                        }).catch(e => {
-                            console.log(e)
-                        })
-                    }
-                })*/
-                // console.log("finish" + (i + 1))
+                    //res.json(JSON.stringify(receipt.transactionHash))
+                    /*database.ref('users').child(id[i]).once("value", snapshot => {
+                        if (snapshot.exists()) { // check ????????????????????????
+                            console.log('Have_data')
+                            database.ref('users').child(id[i]).update({
+                                // balance: (req.headers.money+toAddress2.balance),
+                                balance: req.headers.money,
+                            }).then(() => {
+                                console.log('push_perfect')
+                            }).catch(e => {
+                                console.log(e)
+                            })
+                        }
+                    })*/
+                    // console.log("finish" + (i + 1))
             }
 
         }
@@ -442,7 +444,7 @@ router.route('/sendadmin/:id/confirm')
         })
 
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 router.route('/getProfileById')
     .get((req, res) => {
         const id = req.headers.id;
@@ -450,7 +452,7 @@ router.route('/getProfileById')
         database.ref('users').child(id).once("value", snapshot => {
             if (snapshot.val()) {
                 const data = snapshot.val().name.GetStaffDetailsResult.string
-                //console.log("data", data)
+                    //console.log("data", data)
                 res.send(JSON.stringify({
                     id: data[0],
                     name: data[1],
@@ -465,7 +467,7 @@ router.route('/getProfileById')
             }
         })
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 router.route('/getProfileforbalance') // ??????????????? ??????
     .get((req, res) => {
         const id = req.headers.id; // ???????????? ??????
@@ -481,11 +483,11 @@ router.route('/getProfileforbalance') // ??????????????? ??????
         })
 
     })
-// <!--===============================================================================================-->
+    // <!--===============================================================================================-->
 async function getReceiverWalletFromId(id) {
     console.log("id in getReceiverWalletFromId", id); //id ??? ??????????????? Toaddress ???????????????????
     return await database.ref('users').child(id).once("value")
-    // console.log("getReceiverWalletFromId = >",id)
+        // console.log("getReceiverWalletFromId = >",id)
 }
 // <!--===============================================================================================-->
 app.listen(8000, () => console.log('Server is ready!'))
