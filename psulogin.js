@@ -16,18 +16,55 @@ app.use(cors());
 var engines = require('consolidate');
 app.use('/api', router);
 app.use('/front', express.static(path.join(__dirname, 'front')));
+app.use('/views', express.static(path.join(__dirname, 'views')));
 app.set('views', __dirname + '/');
 app.engine('html', engines.mustache);
-app.set('view engine', 'html');
+app.set('views engine', 'html');
 var Web3EthAccounts = require('web3-eth-accounts');
 var firebase = require('firebase')
+
 app.use(bodyParser.urlencoded({ extended: true }), router)
-app.use(bodyParser.json, router)
-app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
-app.use(function(req, res, next) {
-        console.log(req.body) // populated!
+app.use(bodyParser.json())
+//app.use(bodyParser.urlencoded({ extended: false }))
+//app.use(bodyParser.json())
+
+app.get('/showdata/confirm', (req, res) => {
+        var test = [];
+        var leadsRef = database.ref('users');
+        leadsRef.on('value', (snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+                var childData = childSnapshot.val();
+                //console.log("childData_formnode===>", childData)
+                test.push(childData)
+            });
+        });
+        res.json(test)
+        //console.log("test ==>" + test)
+        // var test_Show = req.headers
+        //var test_Show1 = req.data
+        // console.log("test_Show ===>", test1)
     })
-    // <!--===============================================================================================-->
+
+app.post('/showdata/confirm', (req, res) => {
+    const data = req.body
+    console.log("data_from_post",data[0].name.GetStaffDetailsResult.string)
+    res.send(data)
+})
+
+router.route('/test2')
+    .post((req, res) => {
+        const data = req.body.data
+        console.log("data5555", data)
+        res.send(data)
+    })
+
+//app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
+app.use(function (req, res, next) {
+    console.log(req.body) // populated!
+})
+
+
+// <!--===============================================================================================-->
 var firebaseConfig = {
     apiKey: "AIzaSyDPwR_Tlxe5MODIEPugWCnO_drEh6-4jjw",
     authDomain: "login-psu-final.firebaseapp.com",
@@ -40,17 +77,17 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 // <!--===============================================================================================-->
-router.route('/')
-    .get((req, res) => {
+router.route('/Login')
+   /* .get((req, res) => {
         res.render('PSULOGIN.html')
-    })
+    })*/
     .post((req, res) => {
         soap.createClient(url, (err, client) => {
             if (err)
                 console.error(err);
             else {
                 let user = {}
-                user.username = req.body.username
+                user.username = req.body.username //id
                 user.password = req.body.password
                 client.GetStaffDetails(user, (err, response) => {
                     if (response.GetStaffDetailsResult.string[0] == "") {
@@ -63,8 +100,9 @@ router.route('/')
                         database.ref('users').child(user.username).once("value", snapshot => {
                             if (snapshot.exists()) { // check ????????????????????????
                                 console.log('already exists')
-                                    // res.send('<script>alert("??????????????????");</script>');
-                                res.redirect('/index/' + user.username)
+                                // res.send('<script>alert("??????????????????");</script>');
+                                //res.redirect('/index/' + user.username)
+                                res.send(snapshot.exists())
                                 return false;
                             } else {
                                 console.log('bad bad')
@@ -76,8 +114,8 @@ router.route('/')
                                     name: response,
                                 }).then(() => {
                                     console.log('create new wallet')
-                                        // console.log('test_Show',name)
-                                        // res.send({ user_eth, response });
+                                    // console.log('test_Show',name)
+                                    // res.send({ user_eth, response });
                                     res.redirect('/index/' + user.username)
                                     return false;
                                     // res.redirect("/showdata)                 
@@ -91,7 +129,7 @@ router.route('/')
             }
         });
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 router.route('/send/:id')
     .get((req, res) => {
         res.render('tranfer.html')
@@ -125,12 +163,12 @@ router.route('/send/:id/confirm')
 
             console.log("toAddress2 =>", toAddress2)
             console.log("totalvalue =>", totalvalue)
-                //console.log("toAddress3 =>", toAddress3)
-                //console.log("toAddress_show_totalvalue =>" , toAddress)
-                // toAddress.(snap => { // ??????????????????????????????
-                //     toAddress2 = snap.val().address
-                //     console.log("toAddress2 =>", toAddress2)
-                // })
+            //console.log("toAddress3 =>", toAddress3)
+            //console.log("toAddress_show_totalvalue =>" , toAddress)
+            // toAddress.(snap => { // ??????????????????????????????
+            //     toAddress2 = snap.val().address
+            //     console.log("toAddress2 =>", toAddress2)
+            // })
 
             web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
             var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
@@ -158,34 +196,52 @@ router.route('/send/:id/confirm')
             console.log("receipt =>", receipt)
             res.json(JSON.stringify(receipt.transactionHash))
             database.ref('users').child(id).once("value", snapshot => {
-                    if (snapshot.exists()) { // check ????????????????????????
-                        console.log('Have_data')
-                        database.ref('users').child(id).update({
-                            // balance: (req.headers.money+toAddress2.balance),
-                            balance: parseInt(req.headers.money) + parseInt(toAddress2.balance)
-                        }).then(() => {
-                            console.log('push_send_perfect')
-                        }).catch(e => {
-                            console.log(e)
-                        })
-                    }
-                })
-                // return receipt
+                if (snapshot.exists()) { // check ????????????????????????
+                    console.log('Have_data')
+                    database.ref('users').child(id).update({
+                        // balance: (req.headers.money+toAddress2.balance),
+                        balance: parseInt(req.headers.money) + parseInt(toAddress2.balance)
+                    }).then(() => {
+                        console.log('push_send_perfect')
+                    }).catch(e => {
+                        console.log(e)
+                    })
+                }
+            })
+            // return receipt
         }
         Tranfer().then((result) => {
             console.log(result)
         })
 
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 
-router.route('/showdata/:id')
-    .get((req, res) => {
-        res.render('showdata.html')
-    })
-router.route('/showdata/:id/confirm')
-    .get((req, res) => {
-        //var test = req.headers.id;
+
+// router.route('/showdata/confirm')
+//     .get((req, res) => {
+        
+//         var test = [];
+//         var leadsRef = database.ref('users');
+//         leadsRef.on('value', (snapshot) => {
+//             snapshot.forEach((childSnapshot) => {
+//                 var childData = childSnapshot.val();
+//                console.log("childData_formnode===>", childData)
+//                 test.push(childData)
+//             });
+//         });
+//         res.json(test)
+//         // var test_Show = req.headers
+//         //var test_Show1 = req.data
+//         // console.log("test_Show ===>", test1)
+//     })
+//     .post((req, res)=>{
+//         //Restful API
+//         var body = req.body;
+//         console.log("Body ===>", body)
+//     })
+
+/*app.get('/showdata/confirm', (req, res) => {
         var test = [];
         var leadsRef = database.ref('users');
         leadsRef.on('value', (snapshot) => {
@@ -195,11 +251,22 @@ router.route('/showdata/:id/confirm')
                 test.push(childData)
             });
         });
-        res.json(JSON.stringify(test))
-            // var test_Show = req.headers
-            //var test_Show1 = req.data
-            // console.log("test_Show ===>", test_Show)
-    })
+        res.json(test)
+        console.log("test ==>" + test)
+        // var test_Show = req.headers
+        //var test_Show1 = req.data
+        // console.log("test_Show ===>", test1)
+    })*/
+
+/*app.post('/showdata/confirm', (req, res) => {
+    const data = req.body
+    console.log(data)
+    res.send(data)
+})*/
+
+
+
+
 
 // <!--===============================================================================================-->
 router.route('/showdata_admin/:id/confirm')
@@ -207,6 +274,7 @@ router.route('/showdata_admin/:id/confirm')
         //var test = req.headers.id;
         var test = [];
         var leadsRef = database.ref('users');
+
         leadsRef.on('value', (snapshot) => {
             snapshot.forEach((childSnapshot) => {
                 var childData = childSnapshot.val();
@@ -226,32 +294,32 @@ router.route('/error')
     .get((req, res) => {
         res.render('error.html')
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 router.route('/test_admin/:id')
     .get((req, res) => {
         res.render('test_admin.html')
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 router.route('/index/:id')
     .get((req, res) => {
         res.render('index.html')
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 router.route('/index/:id/confirm')
-    .get((req, res) => {})
-    // <!--===============================================================================================-->
-    //profile.html
+    .get((req, res) => { })
+// <!--===============================================================================================-->
+//profile.html
 
 router.route('/profile/:id')
     .get((req, res) => {
         res.render('profile.html')
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 router.route('/balance/:id')
     .get((req, res) => {
         res.render('balance.html')
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 router.route('/balance/:id/confirm')
     .get((req, res) => {
         web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
@@ -265,7 +333,7 @@ router.route('/balance/:id/confirm')
                     console.log("decimals => ", decimals);
                     console.log("balance => ", balance, "PSU");
                     res.json(JSON.stringify(balance))
-                        // res.send(JSON.stringify(balance))
+                    // res.send(JSON.stringify(balance))
                 }).then(() => {
                     console.log('complete_check_balance')
                 }).catch(e => {
@@ -280,7 +348,7 @@ router.route('/balance/:id/confirm')
             console.log("walletAddress =>", walletAddress)
             console.log("tokenAddress =>", tokenAddress)
             if (tokenAddress != "" && walletAddress != "") {
-                getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {})
+                getERC20TokenBalance(tokenAddress, walletAddress, (balance) => { })
             }
         }
         onAddressChange((resolve, reject) => {
@@ -302,24 +370,29 @@ router.route('/balance_admin/:id/confirm')
                     console.log("decimals => ", decimals);
                     console.log("balance => ", balance, "PSU");
                     database.ref('users').child(string).once("value", snapshot => {
-                            if (snapshot.exists()) { // check ????????????????????????
-                                //console.log('Have_data')
-                                database.ref('users').child(string).update({
-                                    // balance: (req.headers.money+toAddress2.balance),
-                                    balance: balance,
-                                }).then(() => {
-                                    //res.json(JSON.stringify(balance))
+                        if (snapshot.exists()) { // check ????????????????????????
+                            //console.log('Have_data')
+                            database.ref('users').child(string).update({
+                                // balance: (req.headers.money+toAddress2.balance),
+                                balance: balance,
+                            }).then(() => {
+                                //res.json(JSON.stringify(balance))
 
-                                    console.log('push_perfect')
+                                console.log('push_perfect')
+
+                                if ('push_perfect') {
+                                    console.log('redirect_complete')
                                     res.redirect('/showdata');
 
+                                }
 
-                                }).catch(e => {
-                                    console.log(e)
-                                })
-                            }
-                        })
-                        // res.send(JSON.stringify(balance))
+
+                            }).catch(e => {
+                                console.log(e)
+                            })
+                        }
+                    })
+                    // res.send(JSON.stringify(balance))
                 }).then(() => {
                     console.log('complete_check_balance')
                 }).catch(e => {
@@ -342,7 +415,7 @@ router.route('/balance_admin/:id/confirm')
                 let wallet = response.val()
                 console.log("wallet ===> ", wallet.address)
                 if (tokenAddress != "" && wallet.address != "") {
-                    getERC20TokenBalance(tokenAddress, wallet.address, string, (balance) => {})
+                    getERC20TokenBalance(tokenAddress, wallet.address, string, (balance) => { })
                 }
             }
         }
@@ -391,7 +464,7 @@ router.route('/sendadmin/:id/confirm')
             console.log("fromAddress =>", fromAddress)
             console.log("money =>", money)
             console.log("privateKey =>", privateKey)
-                //console.log("totalvalue =>", totalvalue)
+            //console.log("totalvalue =>", totalvalue)
             web3.setProvider(new web3.providers.HttpProvider("https://kovan.infura.io/v3/37dd526435b74012b996e147cda1c261"));
             var abi = JSON.parse(fs.readFileSync(path.resolve(__dirname, './abi.json'), 'utf-8'));
             var count = await web3.eth.getTransactionCount(fromAddress);
@@ -421,21 +494,21 @@ router.route('/sendadmin/:id/confirm')
                 console.log("serializedTx =>", serializedTx)
                 var receipt = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
                 console.log("receipt =>", receipt)
-                    //res.json(JSON.stringify(receipt.transactionHash))
-                    /*database.ref('users').child(id[i]).once("value", snapshot => {
-                        if (snapshot.exists()) { // check ????????????????????????
-                            console.log('Have_data')
-                            database.ref('users').child(id[i]).update({
-                                // balance: (req.headers.money+toAddress2.balance),
-                                balance: req.headers.money,
-                            }).then(() => {
-                                console.log('push_perfect')
-                            }).catch(e => {
-                                console.log(e)
-                            })
-                        }
-                    })*/
-                    // console.log("finish" + (i + 1))
+                //res.json(JSON.stringify(receipt.transactionHash))
+                /*database.ref('users').child(id[i]).once("value", snapshot => {
+                    if (snapshot.exists()) { // check ????????????????????????
+                        console.log('Have_data')
+                        database.ref('users').child(id[i]).update({
+                            // balance: (req.headers.money+toAddress2.balance),
+                            balance: req.headers.money,
+                        }).then(() => {
+                            console.log('push_perfect')
+                        }).catch(e => {
+                            console.log(e)
+                        })
+                    }
+                })*/
+                // console.log("finish" + (i + 1))
             }
 
         }
@@ -444,7 +517,7 @@ router.route('/sendadmin/:id/confirm')
         })
 
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 router.route('/getProfileById')
     .get((req, res) => {
         const id = req.headers.id;
@@ -452,7 +525,7 @@ router.route('/getProfileById')
         database.ref('users').child(id).once("value", snapshot => {
             if (snapshot.val()) {
                 const data = snapshot.val().name.GetStaffDetailsResult.string
-                    //console.log("data", data)
+                //console.log("data", data)
                 res.send(JSON.stringify({
                     id: data[0],
                     name: data[1],
@@ -467,7 +540,7 @@ router.route('/getProfileById')
             }
         })
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 router.route('/getProfileforbalance') // ??????????????? ??????
     .get((req, res) => {
         const id = req.headers.id; // ???????????? ??????
@@ -483,13 +556,15 @@ router.route('/getProfileforbalance') // ??????????????? ??????
         })
 
     })
-    // <!--===============================================================================================-->
+// <!--===============================================================================================-->
 async function getReceiverWalletFromId(id) {
     console.log("id in getReceiverWalletFromId", id); //id ??? ??????????????? Toaddress ???????????????????
     return await database.ref('users').child(id).once("value")
-        // console.log("getReceiverWalletFromId = >",id)
+    // console.log("getReceiverWalletFromId = >",id)
 }
 // <!--===============================================================================================-->
+
+
 app.listen(8000, () => console.log('Server is ready!'))
 
 
