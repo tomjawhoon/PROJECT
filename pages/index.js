@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import AdminHeader from '../components/layouts/admin.header'
+/*import AdminHeader from '../components/layouts/admin.header'
 import AdminSidebar from '../components/layouts/admin.menu'
-import AdminFooter from '../components/layouts/admin.footer'
+import AdminFooter from '../components/layouts/admin.footer'*/
 import AdminHOC from '../components/layouts/admin.hoc'
 import axios from 'axios'
 
@@ -48,10 +48,18 @@ const Postdata = (apiRes) => {
       "Content-Type": 'application/json'
     };
     axios.post("http://localhost:8000/showdata/confirm", apiRes, header);
-    console.log("postdata ==>" + JSON.stringify(apiRes))
+    //console.log("postdata ==>" + JSON.stringify(apiRes))
   } catch (e) {
     console.log(`Axios request failed: ${e}`);
   }
 }
+
+
+/*const Postdata = (apiRes) => {
+  axios.post('http://localhost:8000/showdata/confirm',{
+      firstName : 'Tom',
+      lastName : 'EIEI'
+  })
+}*/
 
 export default Home 
